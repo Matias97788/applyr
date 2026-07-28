@@ -17,6 +17,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           port: 21
+          timeout: 120000
           server-dir: public_html/blueads.cl/autoapply/
           exclude: |
             **/.git*
