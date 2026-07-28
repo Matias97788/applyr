@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Applyr — Auto Apply</title>
+<style>
+  :root{--brand:#6d28d9;--brand2:#7c3aed;--ink:#1a1630;--muted:#6b6785;--line:#e7e3f2;--soft:#f3efff;--bg:#f3f2f7;--green:#16a34a;--greensoft:#e7f7ee;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .hbar{display:flex;align-items:center;gap:14px;max-width:1000px;margin:0 auto;padding:14px 20px}
+  .back{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-weight:700;font-size:13px;cursor:pointer}
+  .saved{color:var(--muted);font-size:12px}
+  .logo{margin-left:auto;margin-right:auto;font-weight:800;color:var(--brand);font-size:20px}
+  .prog{height:6px;background:var(--line)}
+  .prog > i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;transition:width .35s ease}
+  main{max-width:660px;margin:0 auto;padding:38px 20px 120px}
+  h1{font-size:30px;text-align:center;margin:8px 0 6px;letter-spacing:-.5px}
+  .sub{text-align:center;color:var(--muted);font-size:15px;line-height:1.5;margin:0 auto 18px;max-width:520px}
+  .reuse{display:block;width:max-content;margin:0 auto 20px;background:var(--soft);color:var(--brand);font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 30px rgba(30,15,60,.05)}
+  label{display:block;font-weight:600;font-size:13px;margin:14px 0 6px}
+  .hint{color:var(--muted);font-weight:400;font-size:12.5px;margin-bottom:6px}
+  input[type=text],input[type=tel],input[type=url],input[type=date],input[type=number],select,textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px 13px;font-size:14px;font-family:inherit;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)}
+  .ok{border-color:var(--green)!important}
+  .drop{border:2px dashed var(--line);border-radius:16px;padding:42px;text-align:center;cursor:pointer}
+  .drop.filled{border-color:var(--green);background:var(--greensoft)}
+  .drop .ic{width:56px;height:56px;border-radius:50%;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px}
+  .drop b{font-size:18px} .drop small{color:var(--muted);display:block;margin-top:6px}
+  .segw{display:flex;justify-content:center;margin-bottom:18px}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:24px;padding:4px}
+  .seg button{border:0;background:none;padding:8px 16px;border-radius:20px;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--soft);color:var(--brand)}
+  .btn{width:100%;border:0;border-radius:24px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.skip{background:#ececf2;color:var(--ink);margin-top:10px}
+  .btn.ghost{background:#fff;border:1px solid var(--line)}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:6px 0 16px}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .tile .ic{width:34px;height:34px;border-radius:9px;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+  .tile b{font-size:12.5px} .tile small{color:var(--muted);font-size:11px;display:block;margin-top:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chip{border:1px solid var(--brand);color:var(--brand);background:#fff;border-radius:20px;padding:6px 12px;font-size:12.5px;cursor:pointer;user-select:none}
+  .chip.off{border-color:var(--line);color:var(--muted)}
+  .chip.add{border-style:dashed}
+  .modecard{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;position:relative}
+  .modecard.on{border-color:var(--brand);background:#fbfaff;box-shadow:0 0 0 1px var(--brand) inset}
+  .modecard .t{display:flex;align-items:center;gap:8px;font-weight:700}
+  .modecard .tag{font-size:11px;font-weight:600;color:var(--green);background:var(--greensoft);padding:2px 8px;border-radius:20px}
+  .modecard p{color:var(--muted);font-size:13px;margin:8px 0 0}
+  .modecard .rd{position:absolute;top:16px;right:16px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line)}
+  .modecard.on .rd{border-color:var(--brand);background:var(--brand)}
+  .rowcard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
+  .rowcard .top{display:flex;justify-content:space-between;font-weight:700;font-size:14px}
+  .addbtn{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--brand);cursor:pointer}
+  .count{color:var(--muted);font-size:12px;float:right}
+  .spin{width:54px;height:54px;border-radius:50%;border:4px solid var(--soft);border-top-color:var(--brand);margin:10px auto;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .check{width:90px;height:90px;border-radius:50%;background:var(--greensoft);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px auto}
+  .tasklist{margin-top:14px} .tasklist div{display:flex;align-items:center;gap:8px;padding:6px 0;color:var(--muted);font-size:14px}
+  .tasklist div.done{color:var(--ink)} .tasklist .b{color:var(--green)}
+  .cfg{max-width:660px;margin:0 auto;padding:6px 20px;color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center}
+  .cfg input{border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:12px;width:auto}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <button class="back" onclick="prev()">‹ Atrás</button>
+    <span class="saved" id="saved">Guardado</span>
+    <span class="logo">appl<span style="color:var(--brand2)">yr</span>*</span>
+    <span style="width:70px"></span>
+  </div>
+  <div class="prog"><i id="bar"></i></div>
+</header>
+<!-- Login gate (Google client-side + respaldo email) -->
+<div id="gate" style="max-width:420px;margin:60px auto;padding:0 20px;text-align:center">
+  <div class="card" style="padding:30px">
+    <h1 style="font-size:26px;margin:0 0 6px">Bienvenido a Applyr</h1>
+    <p class="sub" style="margin-bottom:20px">Inicia sesión para empezar tu búsqueda automática.</p>
+    <div id="gbtn" style="display:flex;justify-content:center;margin-bottom:14px"></div>
+    <button id="ggeneric" class="btn primary" style="width:100%">Continuar con Google</button>
+    <div style="color:var(--muted);font-size:12px;margin:14px 0">o</div>
+    <input id="gemail" type="email" placeholder="tu@email.com" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:12px 13px;font-size:14px"/>
+    <button id="gemailbtn" class="btn skip" style="width:100%;margin-top:10px">Continuar con email</button>
+    <p class="sub" style="font-size:11px;margin-top:14px">Al continuar aceptas los Términos y la Política de Privacidad.</p>
+  </div>
+</div>
+
+<div id="wizard" style="display:none">
+<div class="cfg">País de búsqueda: <input id="country" value="Chile" size="10"/> · roles (coma): <input id="titles" value="Developer, Ingeniero de Software" size="30"/></div>
+<main id="view"></main>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="engine.js?v=6"></script>
+<script>
+// === CONFIG: pega aquí tu Client ID de Google (opcional). Sin él, "Continuar con Google" entra en modo demo. ===
+const GOOGLE_CLIENT_ID = "";
+function decodeJwt(t){ try{ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }catch(e){ return {}; } }
+function enterApp(profile){ try{ ApplyrEngine.setProfile(profile); }catch(e){} document.getElementById('gate').style.display='none'; document.getElementById('wizard').style.display='block'; render(); }
+function onGoogle(resp){ const p=decodeJwt(resp.credential); enterApp({ fullname:p.name||'', email:p.email||'', picture:p.picture||'', sub:p.sub||'', provider:'google' }); }
+window.addEventListener('load',()=>{
+  if(GOOGLE_CLIENT_ID && window.google && google.accounts){
+    google.accounts.id.initialize({ client_id:GOOGLE_CLIENT_ID, callback:onGoogle });
+    google.accounts.id.renderButton(document.getElementById('gbtn'),{theme:'outline',size:'large',width:340,text:'continue_with'});
+    document.getElementById('ggeneric').style.display='none';
+  }
+});
+document.getElementById('ggeneric').addEventListener('click',()=>{ enterApp({ fullname:'', email:'', provider:'google-demo' }); });
+document.getElementById('gemailbtn').addEventListener('click',()=>{ const e=document.getElementById('gemail').value.trim(); if(!/^[^@]+@[^@]+\.[^@]+$/.test(e)){ alert('Email inválido'); return; } enterApp({ email:e, provider:'email' }); });
+</script>
+<script>
+const S = { source:'resume', titles:[], mode:'auto', notify:{} };
+let step = 0;
+const view = document.getElementById('view');
+
+// Cada paso = { render() } con copy EXACTO de AIApply (traducido/calcado).
+const STEPS = [
+ // 0 — Import Your Data
+ ()=>`<h1>Importa tus datos</h1><p class="sub">Elige la fuente más actualizada</p>
+   <div class="segw"><div class="seg"><button class="on">Subir CV</button><button>Traer de LinkedIn</button></div></div>
+   <div class="card"><div class="drop" onclick="next()"><div class="ic">⤓</div><b>Haz clic para subir, o arrastra y suelta</b><small>PDF, DOC, DOCX, PNG, JPG</small></div></div>`,
+ // 1 — Terms
+ ()=>`<h1>Antes de continuar, revisa estos términos</h1>
+   <div class="card"><b>Applyr — Acuerdo de Usuario y Términos de Auto-Apply</b>
+   <p class="hint">Versión: v1.0 · Actualizado: hoy<br>Al continuar, confirmas que has leído, entendido y aceptas este Acuerdo. Si no estás de acuerdo, no continúes.</p>
+   <p style="font-size:13px"><b>1. Alcance.</b> Este Acuerdo regula Auto-Apply, que encuentra vacantes en plataformas de terceros (ATS/bolsas) y —según tus instrucciones— redacta y envía postulaciones usando modelos de lenguaje (LLMs).</p>
+   <p style="font-size:13px"><b>2. Servicio automatizado; límites.</b> Auto-Apply opera con mejor esfuerzo usando datos que provees, plataformas de terceros y sistemas de IA. No garantizamos entrevistas ni ofertas.</p></div>
+   <button class="btn primary" onclick="next()">Continuar a Auto Apply</button>`,
+ // 2 — Upload resume
+ ()=>`<h1>Sube tu CV</h1><p class="sub">Tu CV muestra a los empleadores tus habilidades y experiencia, y muchas veces decide si avanzas.</p>
+   <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
+   <div class="card"><div class="drop ${S.cv?'filled':''}" id="cvdrop" onclick="fakeCv()">
+     <div class="ic">${S.cv?'✓':'⤓'}</div><b>${S.cv?S.cv:'Haz clic para subir, o arrastra y suelta'}</b><small>${S.cv?'Archivo subido correctamente':'PDF, DOC, DOCX'}</small></div></div>
+   <button class="btn primary" onclick="readCv()">Continuar →</button>`,
+ // 3 — Reading resume (auto)
+ ()=>{setTimeout(()=>{if(step===3)next()},2200);return `<h1>Leyendo tu CV</h1><p class="sub">Estamos analizando tu CV para extraer la información clave que prellenará automáticamente los campos de las postulaciones.</p>
+   <div class="spin"></div>
+   <div class="card"><div class="tasklist">
+     <div class="done"><b style="color:var(--brand)">Ahora ·</b> <b>Revisión de perfil</b> — dejando todo optimizado antes de enviar una sola postulación.</div>
+     <div>~10 min · <b>Primeras postulaciones enviadas</b> — sin acción de tu parte.</div>
+     <div>3–5 días · <b>Respuestas llegan a tu bandeja</b> — los reclutadores responden directamente.</div>
+   </div></div>`},
+ // 4 — Profile photo
+ ()=>`<h1>Sube una foto de perfil</h1><p class="sub">Algunas postulaciones pueden pedir una foto de perfil. Sube una imagen clara en formato PNG, JPG o JPEG.</p>
+   <div class="card"><div class="drop" onclick="next()"><div class="ic">👤</div><b>Haz clic para subir, o arrastra y suelta</b><small>PNG, JPG, JPEG</small></div></div>
+   <button class="btn primary" onclick="next()">Continuar →</button><button class="btn skip" onclick="next()">Omitir</button>`,
+ // 5 — Personal details
+ ()=>`<h1>¿Cuáles son tus datos personales?</h1><p class="sub">Usamos esta información para emparejarte con empleos y para que los empleadores te contacten.</p>
+   <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
+   <div class="card">
+     <label>¿Cuál es tu nombre completo?</label><input type="text" id="fullname" placeholder="Nombre y apellidos"/>
+     <label>URL de LinkedIn</label><div class="hint">Muchas postulaciones piden un perfil de LinkedIn. Agrega el tuyo para conseguir más entrevistas.</div>
+     <input type="url" id="linkedin" placeholder="www.linkedin.com/in/tu-perfil"/>
+     <label>Teléfono</label><input type="tel" id="phone" placeholder="+56 9 ..."/>
+     <label>¿Cuándo naciste?</label><input type="date" id="dob"/>
+   </div><button class="btn primary" onclick="next()">Continuar →</button>`,
+ // 6 — Address
+ ()=>`<h1>¿Dónde vives?</h1><p class="sub">Es tu dirección de residencia, requerida para postulaciones y registros. NO se usará para influir en tus preferencias de búsqueda.</p>
+   <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
+   <div class="card"><label>Dirección</label><input type="text" placeholder="Calle y número"/>
+     <label>Dirección línea 2 (opcional)</label><input type="text" placeholder="Departamento 4"/>
+     <label>Ciudad</label><input type="text" placeholder="Ciudad"/>
+     <label>País</label><select><option>Chile</option><option>Argentina</option><option>Perú</option><option>Colombia</option><option>México</option></select>
+     <label>Código postal</label><input type="text" placeholder="10001"/>
+   </div><button class="btn primary" onclick="next()">Continuar →</button>`,
+ // 7 — Background
+ ()=>`<h1>Cuéntanos sobre tu experiencia</h1><p class="sub">Estos datos de tu CV nos ayudan a referenciar tu perfil en las postulaciones.</p>
+   <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Experiencia <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div>
+     <div class="rowcard"><div class="top"><span>Cargo · Empresa</span><span class="hint">2022 – Presente</span></div><p class="hint">Descripción prellenada desde tu CV.</p></div></div>
+   <div class="card" style="margin-top:12px"><div class="top" style="display:flex;justify-content:space-between"><b>Educación <span class="hint">(Requerido)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <div class="card" style="margin-top:12px"><div class="top" style="display:flex;justify-content:space-between"><b>Idiomas <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <div class="card" style="margin-top:12px"><div class="top" style="display:flex;justify-content:space-between"><b>Habilidades <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <button class="btn primary" onclick="next()">Continuar →</button>`,
+ // 8 — References
+ ()=>`<h1>¿Tienes referencias de empleadores anteriores?</h1><p class="sub">Agregar referencias profesionales ayuda a los empleadores a verificar tu experiencia y mejora tu postulación.</p>
+   <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Referencias profesionales <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <button class="btn primary" onclick="next()">Continuar →</button><button class="btn skip" onclick="next()">Omitir</button>`,
+ // 9 — Exclude companies
+ ()=>`<h1>¿Quieres excluir ciertas empresas?</h1><p class="sub">Indica las empresas que quieres excluir de tus resultados de búsqueda.</p>
+   <div class="card"><label>Nombre de la empresa <span class="count">0/5</span></label><input type="text" placeholder='Por ejemplo "Google"'/>
+   <p class="hint" style="margin-top:10px">Los empleos de las empresas excluidas no aparecerán en tu búsqueda. Ayuda a evitar postular por error a tu empleador actual.</p></div>
+   <button class="btn primary" onclick="next()">Continuar →</button><button class="btn skip" onclick="next()">Omitir</button>`,
+ // 10 — Demographics
+ ()=>`<h1>Cuéntanos sobre ti</h1><p class="sub">Pedimos tu etnia, nacionalidad y género para promover una contratación inclusiva y mejores coincidencias.</p>
+   <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
+   <div class="card">
+     <label>¿Qué describe mejor tu raza o etnia?</label><select><option>Prefiero no decir</option></select>
+     <label>¿Cuál es tu nacionalidad?</label><select><option>Prefiero no decir</option><option>Chilena</option></select>
+     <label>¿Cómo describirías tu orientación sexual?</label><select><option>Prefiero no entregar esta información</option></select>
+     <label>¿Te identificas como transgénero?</label><select><option>Prefiero no entregar esta información</option></select>
+   </div><button class="btn primary" onclick="next()">Continuar →</button>`,
+ // 11 — Inbox
+ ()=>`<h1>Crea tu bandeja de Auto Apply</h1><p class="sub">Una bandeja dedicada nos deja gestionar tu búsqueda de punta a punta mientras tu correo personal queda limpio. Esto es lo que hace:</p>
+   <div class="tiles">
+     <div class="tile"><div class="ic">🛡</div><b>Anti-spam</b><small>Bloquea estafas y marca remitentes riesgosos</small></div>
+     <div class="tile"><div class="ic">▤</div><b>Auto-orden</b><small>Clasifica cada correo por su tipo</small></div>
+     <div class="tile"><div class="ic">🤖</div><b>Sin manos</b><small>Maneja códigos OTP y el trabajo repetitivo</small></div>
+     <div class="tile"><div class="ic">🔔</div><b>Notificado</b><small>Updates clave van a tu correo personal</small></div>
+   </div>
+   <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Notificarme en mi correo personal</b><span>🟣</span></div>
+   <div class="chips">${['Invitaciones a entrevista','Ofertas y contrataciones','Seguimientos de entrevista','Invitaciones a assessment','Resultados de assessment','Confirmaciones de postulación','Rechazos','Formularios de igualdad','Otros updates'].map(c=>`<span class="chip">${c}</span>`).join('')}</div></div>
+   <button class="btn primary" onclick="next()">Guardar y continuar</button>`,
+ // 12 — Mode
+ ()=>`<h1>¿Cómo debemos postular por ti?</h1>
+   <div class="card">
+     ${modeCard('hybrid','Modo Híbrido','Lo mejor de ambos','Mejor equilibrio entre velocidad y control. Auto-postulamos a roles de alto match (75%+). Tú decides el resto.')}
+     ${modeCard('auto','Modo Auto','Ahorra tiempo, sin aprobación','Totalmente sin manos. Máxima velocidad. Nuestro agente IA encuentra y postula por ti.')}
+     ${modeCard('review','Modo Revisión','Aprueba cada empleo','Control total. Nada se envía sin tu aprobación. Revisa cada coincidencia.')}
+   </div><button class="btn primary" onclick="genKit()">Continuar →</button>`,
+ // 13 — Generating kit (auto)
+ ()=>{genAnim();return `<h1>Generando tu kit de postulación</h1><p class="sub">Esto suele tardar unos 20 segundos</p>
+   <div class="card"><div class="spin"></div><div class="tasklist" id="genlist">
+     <div id="g0">◦ Generando carta de presentación</div><div id="g1">◦ Generando CV</div>
+     <div id="g2">◦ Generando email de seguimiento</div><div id="g3">◦ Buscando empleos que coinciden</div>
+   </div><p class="hint" style="text-align:center">🛡 Tus datos se procesan de forma segura.</p></div>`},
+ // 14 — All set
+ ()=>`<div class="check">✓</div><h1>¡Todo listo!</h1><p class="sub">Tu suscripción de Auto-Apply está activa. Empezaremos a buscar empleos para ti de inmediato.</p>
+   <div class="card"><b>Tu búsqueda ya está corriendo</b><div class="tasklist">
+     <div class="done"><b class="b">Ahora ·</b> Revisión de perfil</div><div>~10 min · Primeras postulaciones</div><div>3–5 días · Respuestas en tu bandeja</div>
+   </div><p class="hint">Analizando empleos frescos en ATS (Greenhouse, Ashby, Lever) + GetOnBoard (CL) para encontrar donde eres top match.</p></div>
+   <button class="btn primary" onclick="goDash()">Ir a mi tablero →</button>`
+];
+
+function modeCard(id,t,tag,desc){return `<div class="modecard ${S.mode===id?'on':''}" onclick="setMode('${id}')"><div class="rd"></div><div class="t">${t} <span class="tag">${tag}</span></div><p>${desc}</p></div>`}
+function setMode(m){S.mode=m;render()}
+function fakeCv(){S.cv='mi-cv.pdf';render()}
+function readCv(){next()}
+function genAnim(){[0,1,2,3].forEach(i=>setTimeout(()=>{const e=document.getElementById('g'+i);if(e){e.innerHTML=e.innerHTML.replace('◦','<span class="b">✓</span>');e.classList.add('done')}},600*(i+1)));setTimeout(()=>{if(step===13)next()},3200)}
+
+function render(){
+  view.innerHTML = STEPS[step]();
+  document.getElementById('bar').style.width = Math.round((step/(STEPS.length-1))*100)+'%';
+  document.getElementById('saved').textContent = 'Guardado hace instantes';
+  window.scrollTo(0,0);
+}
+function next(){ if(step<STEPS.length-1){step++;render()} }
+function prev(){ if(step>0){step--;render()} }
+
+async function genKit(){ next(); // dispara búsqueda real en el motor del navegador mientras "genera"
+  try{
+    const titles=(document.getElementById('titles').value||'').split(',').map(t=>t.trim()).filter(Boolean);
+    ApplyrEngine.setPreferences({ titles: titles.length?titles:['Developer','Ingeniero de Software'], country: document.getElementById('country').value, remote:true });
+    ApplyrEngine.setMode(S.mode);
+    await ApplyrEngine.search();
+  }catch(e){}
+}
+function goDash(){ location.href='dashboard.html'; }
+// segmentos superiores del paso 0
+document.addEventListener('click',e=>{ if(e.target.closest('.seg')){const b=e.target.closest('button');if(b){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on')}} });
+render();
+</script>
+</body>
+</html>
