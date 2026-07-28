@@ -1,0 +1,98 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 8px 30px rgba(30, 15, 60, .05);
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  margin: 14px 0 6px;
+}
+
+.hint {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+}
+
+input[type=text],
+input[type=tel],
+input[type=url],
+input[type=date],
+input[type=number],
+input[type=email],
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px 13px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.btn {
+  width: 100%;
+  border: 0;
+  border-radius: 24px;
+  padding: 15px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.btn.primary { background: var(--brand); color: #fff; }
+.btn.skip { background: #ececf2; color: var(--ink); margin-top: 10px; }
+
+.logo {
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--brand);
+}
+
+.logo span { color: var(--brand2); }
+
+.sub {
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 auto 18px;
+  max-width: 520px;
+}
+
+h1 {
+  font-size: 30px;
+  text-align: center;
+  margin: 8px 0 6px;
+  letter-spacing: -.5px;
+}
+
+.hidden { display: none !important; }
+
+.auth-pending {
+  visibility: hidden;
+}

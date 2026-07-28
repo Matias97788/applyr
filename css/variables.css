@@ -1,0 +1,17 @@
+:root {
+  --brand: #6d28d9;
+  --brand2: #7c3aed;
+  --ink: #1a1630;
+  --muted: #6b6785;
+  --line: #e7e3f2;
+  --soft: #f3efff;
+  --bg: #f3f2f7;
+  --green: #16a34a;
+  --greensoft: #e7f7ee;
+  --amber: #b45309;
+  --ambersoft: #fef3e2;
+  --red: #dc2626;
+  --redsoft: #fdeaea;
+  --card: #fff;
+  --shadow: 0 1px 3px rgba(20, 10, 50, .06), 0 8px 24px rgba(20, 10, 50, .05);
+}

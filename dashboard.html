@@ -1,93 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Applyr — Auto Apply</title>
-<style>
-  :root{--bg:#f6f7fb;--card:#fff;--ink:#1a1630;--muted:#6b6785;--line:#ece9f5;--brand:#6d28d9;--brand2:#8b5cf6;--brandsoft:#f2ecff;--green:#16a34a;--greensoft:#e8f7ee;--amber:#b45309;--ambersoft:#fef3e2;--red:#dc2626;--redsoft:#fdeaea;--shadow:0 1px 3px rgba(20,10,50,.06),0 8px 24px rgba(20,10,50,.05)}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;background:var(--bg);color:var(--ink)}
-  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
-  aside{background:var(--card);border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh;overflow:auto;z-index:20}
-  .logo{font-weight:800;font-size:20px;color:var(--brand);letter-spacing:-.5px;padding:6px 10px 16px}
-  .logo span{color:var(--brand2)}
-  .navgrp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:16px 10px 6px}
-  .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;cursor:pointer}
-  .nav a.active,.nav a:hover{background:var(--brandsoft);color:var(--brand)}
-  .nav a .dot{width:20px;text-align:center}
-  .badge{margin-left:auto;background:var(--brand);color:#fff;border-radius:20px;font-size:11px;padding:1px 7px}
-  main{padding:22px 30px;min-width:0}
-  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  h1{font-size:22px;margin:0 0 2px} .sub{color:var(--muted);font-size:13px;margin:0}
-  .pill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;background:#eef0f5;color:var(--muted)}
-  .pill .g{width:8px;height:8px;border-radius:50%;background:#9aa}
-  .pill.on{background:var(--greensoft);color:var(--green)} .pill.on .g{background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
-  .rightbar{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
-  .btn{border:0;border-radius:10px;padding:9px 15px;font-weight:600;font-size:13px;cursor:pointer}
-  .btn.primary{background:var(--brand);color:#fff}
-  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
-  .btn.sm{padding:6px 11px;font-size:12px}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  select,input[type=search],input[type=text]{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;background:#fff;color:var(--ink);font-family:inherit}
-  select{font-weight:600}
-  .kpis{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin:18px 0}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
-  .kpi .lbl{color:var(--muted);font-size:12px;font-weight:600} .kpi .val{font-size:30px;font-weight:800;margin-top:6px}
-  .tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin:6px 0 0}
-  .tabs button{border:0;background:none;padding:12px 2px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
-  .tabs button.active{color:var(--brand);border-color:var(--brand)}
-  .subtabs{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
-  .subtabs button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
-  .subtabs button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .toolbar{display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
-  table{width:100%;border-collapse:collapse}
-  thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line)}
-  tbody td{padding:13px 16px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
-  tbody tr:hover{background:#faf9ff}
-  .co{display:flex;align-items:center;gap:10px}
-  .avatar{width:30px;height:30px;border-radius:8px;background:var(--brandsoft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
-  .st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block}
-  .st.ready{background:var(--ambersoft);color:var(--amber)} .st.applied{background:var(--greensoft);color:var(--green)} .st.declined{background:var(--redsoft);color:var(--red)}
-  .match{font-weight:800;color:var(--green)} .match.mid{color:var(--amber)} .match.low{color:var(--muted)}
-  .fresh{font-size:11px;color:var(--muted)}
-  .linkbtn{color:var(--brand);text-decoration:none;font-weight:600;background:none;border:0;cursor:pointer;font-size:13px}
-  .empty{padding:44px;text-align:center;color:var(--muted)}
-  .src{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:6px}
-  /* Quick Review card */
-  .qr{max-width:820px;margin:16px auto}
-  .qrcard{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px}
-  .qrhead{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .qrhead h2{margin:0;font-size:20px} .qrhead .cmp{color:var(--muted);font-size:14px;margin-top:2px}
-  .fitbig{background:var(--greensoft);color:var(--green);font-weight:800;border-radius:12px;padding:8px 12px;text-align:center;white-space:nowrap}
-  .fitbig.mid{background:var(--ambersoft);color:var(--amber)} .fitbig.low{background:#eef0f5;color:var(--muted)}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}
-  .cols h4{margin:0 0 8px;font-size:13px}
-  .li{display:flex;gap:8px;font-size:13px;color:var(--ink);padding:3px 0} .li.gap{color:var(--muted)}
-  .qractions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
-  .qractions .btn{flex:1;min-width:120px;padding:13px}
-  .btn.apply{background:var(--green);color:#fff} .btn.decline{background:var(--redsoft);color:var(--red)} .btn.skip{background:#eef0f5;color:var(--muted)}
-  .note{background:var(--brandsoft);color:var(--brand);border-radius:10px;padding:10px 14px;font-size:12.5px;margin:12px 0}
-  .hidden{display:none}
-  .qa{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
-  .qa input{flex:1}
-  .hamb{display:none;border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 10px;font-size:16px;cursor:pointer}
-  @media (max-width:860px){
-    .app{grid-template-columns:1fr}
-    aside{position:fixed;left:0;top:0;width:230px;transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow)}
-    aside.open{transform:translateX(0)}
-    .hamb{display:inline-block}
-    .kpis{grid-template-columns:1fr}
-    .cols{grid-template-columns:1fr}
-    main{padding:16px}
-  }
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>instaWork — Auto Apply</title>
+  <link rel="stylesheet" href="css/variables.css"/>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
 </head>
-<body>
+<body class="dashboard auth-pending">
 <div class="app">
   <aside id="side">
-    <div class="logo">appl<span>yr</span></div>
+    <div class="logo">insta<span>Work</span></div>
     <div class="navgrp">Auto Apply</div>
     <div class="nav">
       <a data-view="dashboard" class="active"><span class="dot">▦</span> Dashboard</a>
@@ -114,25 +38,33 @@
     <div class="top">
       <div style="display:flex;align-items:center;gap:12px">
         <button class="hamb" id="hamb">☰</button>
-        <div><h1 id="viewTitle">Auto Apply</h1><p class="sub" id="viewSub">Postula a empleos que cumplen tus criterios · <b>mercado CL</b></p></div>
+        <div>
+          <h1 id="viewTitle">Auto Apply</h1>
+          <p class="sub" id="viewSub">Postula a empleos que cumplen tus criterios · <b>mercado CL</b></p>
+        </div>
       </div>
       <div class="rightbar">
         <span id="statePill" class="pill"><span class="g"></span> Inactivo</span>
         <span>Tienes <b id="credits">—</b> créditos</span>
-        <select id="mode"><option value="review">Review mode</option><option value="hybrid">Hybrid mode</option><option value="auto">Auto mode</option></select>
+        <select id="mode">
+          <option value="review">Review mode</option>
+          <option value="hybrid">Hybrid mode</option>
+          <option value="auto">Auto mode</option>
+        </select>
         <button class="btn primary" id="searchBtn">Buscar y postular</button>
       </div>
     </div>
 
-    <!-- DASHBOARD -->
     <section id="v-dashboard">
       <div class="kpis">
         <div class="kpi"><div class="lbl">Estado</div><div class="val" id="stateVal" style="font-size:18px">Inactivo</div></div>
         <div class="kpi"><div class="lbl">Postulaciones enviadas</div><div class="val" id="kApplied">0</div></div>
         <div class="kpi"><div class="lbl">Empleos encontrados</div><div class="val" id="kFound">0</div></div>
       </div>
-      <div class="tabs"><button data-tab="jobs" class="active">Your Jobs</button><button data-tab="review">Quick Review</button></div>
-      <!-- Your Jobs -->
+      <div class="tabs">
+        <button data-tab="jobs" class="active">Your Jobs</button>
+        <button data-tab="review">Quick Review</button>
+      </div>
       <div id="tab-jobs">
         <div style="display:flex;align-items:center;flex-wrap:wrap">
           <div class="subtabs">
@@ -142,217 +74,95 @@
             <button data-st="declined">Descartados</button>
           </div>
           <div class="toolbar">
-            <input type="search" id="q" placeholder="Buscar empleos o empresas…" />
-            <select id="sort"><option value="fit_score">Fit score</option><option value="published_at">Más recientes</option></select>
+            <input type="search" id="q" placeholder="Buscar empleos o empresas…"/>
+            <select id="sort">
+              <option value="fit_score">Fit score</option>
+              <option value="published_at">Más recientes</option>
+            </select>
           </div>
         </div>
-        <div class="card"><table><thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead>
-          <tbody id="rows"><tr><td colspan="4" class="empty">Pulsa <b>Buscar y postular</b> para llenar tu cola con empleos frescos.</td></tr></tbody></table></div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead>
+            <tbody id="rows"><tr><td colspan="4" class="empty">Pulsa <b>Buscar y postular</b> para llenar tu cola con empleos frescos.</td></tr></tbody>
+          </table>
+          <div class="pager hidden" id="jobsPager" aria-label="Paginación de empleos"></div>
+        </div>
       </div>
-      <!-- Quick Review -->
       <div id="tab-review" class="hidden"><div class="qr" id="qr"></div></div>
     </section>
 
-    <!-- BUSCAR -->
     <section id="v-buscar" class="hidden">
-      <div class="card" style="padding:18px;margin-top:14px">
+      <div class="card pad-card">
         <h3 style="margin:0 0 10px">Buscar empleos</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="text" id="bq" placeholder="Rol o palabra clave (ej: Developer, Diseñador)" style="flex:1;min-width:220px"/>
-          <input type="text" id="bcountry" placeholder="País" value="Chile" style="width:120px"/>
+          <input type="text" id="bq" class="inline" placeholder="Rol o palabra clave (ej: Developer, Diseñador)" style="flex:1;min-width:220px"/>
+          <input type="text" id="bcountry" class="inline" placeholder="País" value="Chile" style="width:120px"/>
           <button class="btn primary" id="bsearch">Buscar</button>
         </div>
         <p class="sub" style="margin-top:10px">Busca en la bolsa agregada (GetOnBoard CL, RemoteOK, Greenhouse, Ashby, Lever) con la regla de oro: solo empleos ≤ 21 días.</p>
       </div>
-      <div class="card" style="margin-top:14px"><table><thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead><tbody id="brows"><tr><td colspan="4" class="empty">Escribe un rol y pulsa Buscar.</td></tr></tbody></table></div>
+      <div class="card" style="margin-top:14px">
+        <table>
+          <thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead>
+          <tbody id="brows"><tr><td colspan="4" class="empty">Escribe un rol y pulsa Buscar.</td></tr></tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- GUARDADOS -->
     <section id="v-guardados" class="hidden">
-      <div class="card" style="margin-top:14px"><table><thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead><tbody id="srows"><tr><td colspan="4" class="empty">Aún no guardas empleos. Usa ★ en Quick Review o en la tabla.</td></tr></tbody></table></div>
+      <div class="card" style="margin-top:14px">
+        <table>
+          <thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead>
+          <tbody id="srows"><tr><td colspan="4" class="empty">Aún no guardas empleos. Usa ★ en Quick Review o en la tabla.</td></tr></tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- ANSWER LIBRARY -->
     <section id="v-answers" class="hidden">
-      <div class="card" style="padding:18px;margin-top:14px">
+      <div class="card pad-card">
         <h3 style="margin:0 0 6px">Answer Library</h3>
         <p class="sub">Responde una vez las preguntas comunes y las reutilizamos en tus postulaciones.</p>
         <div id="qalist"></div>
-        <div style="display:flex;gap:8px;margin-top:12px"><input type="text" id="qaq" placeholder="Pregunta" style="flex:1"/><input type="text" id="qaa" placeholder="Respuesta" style="flex:1"/><button class="btn primary" id="qaadd">Agregar</button></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <input type="text" id="qaq" class="inline" placeholder="Pregunta" style="flex:1"/>
+          <input type="text" id="qaa" class="inline" placeholder="Respuesta" style="flex:1"/>
+          <button class="btn primary" id="qaadd">Agregar</button>
+        </div>
       </div>
     </section>
 
-    <!-- PREFERENCIAS -->
     <section id="v-prefs" class="hidden">
-      <div class="card" style="padding:18px;margin-top:14px">
+      <div class="card pad-card">
         <h3 style="margin:0 0 8px">Preferencias</h3>
         <div id="prefbody" class="sub"></div>
-        <button class="btn primary" style="margin-top:12px" onclick="try{parent.postMessage('applyr:edit-profile','*')}catch(e){}">Editar en el asistente →</button>
+        <button class="btn primary" style="margin-top:12px" onclick="window.location.href='onboarding.html'">Editar en el asistente →</button>
       </div>
     </section>
 
-    <!-- INBOX / DOCS / ENTREVISTA (honestos) -->
-    <section id="v-inbox" class="hidden"><div class="card" style="padding:28px;margin-top:14px"><h3 style="margin:0 0 6px">Inbox dedicado</h3><p class="sub">Buzón propio del servicio (IMAP) que clasifica respuestas de reclutadores. <b>Disponible en la Fase 2</b> (requiere infraestructura de correo).</p></div></section>
-    <section id="v-docs" class="hidden"><div class="card" style="padding:28px;margin-top:14px"><h3 style="margin:0 0 6px">Documentos</h3><p class="sub">Constructor de CV, cartas y kits por empleo (con IA). <b>Disponible en la Fase 2.</b></p></div></section>
-    <section id="v-entrevista" class="hidden"><div class="card" style="padding:28px;margin-top:14px"><h3 style="margin:0 0 6px">Entrevista</h3><p class="sub">Interview Buddy y Mock Interviews con IA. <b>Disponible en la Fase 2.</b></p></div></section>
+    <section id="v-inbox" class="hidden">
+      <div class="card pad-card">
+        <h3 style="margin:0 0 6px">Inbox dedicado</h3>
+        <p class="sub">Buzón propio del servicio (IMAP) que clasifica respuestas de reclutadores. <b>Disponible en la Fase 2</b> (requiere infraestructura de correo).</p>
+      </div>
+    </section>
+    <section id="v-docs" class="hidden">
+      <div class="card pad-card">
+        <h3 style="margin:0 0 6px">Documentos</h3>
+        <p class="sub">Constructor de CV, cartas y kits por empleo (con IA). <b>Disponible en la Fase 2.</b></p>
+      </div>
+    </section>
+    <section id="v-entrevista" class="hidden">
+      <div class="card pad-card">
+        <h3 style="margin:0 0 6px">Entrevista</h3>
+        <p class="sub">Interview Buddy y Mock Interviews con IA. <b>Disponible en la Fase 2.</b></p>
+      </div>
+    </section>
   </main>
 </div>
 
-<script src="engine.js?v=6"></script>
-<script>
-(function(){
-  const $ = id => document.getElementById(id);
-  const esc = s => (s||'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const fitClass = f => f>=80?'':(f>=65?'mid':'low');
-  const ageTxt = a => a==null?'':(a===0?'hoy':'hace '+a+'d');
-  let curStatus='', curTab='jobs', qrIndex=0;
-
-  const TITLES = { dashboard:['Auto Apply','Postula a empleos que cumplen tus criterios · mercado CL'],
-    buscar:['Buscar empleos','Explora la bolsa agregada con la regla de oro'],
-    guardados:['Guardados','Los empleos que marcaste con ★'],
-    answers:['Answer Library','Respuestas comunes reutilizables'],
-    prefs:['Preferencias','Tu perfil de búsqueda'],
-    inbox:['Inbox','Buzón dedicado'], docs:['Documentos','CV, cartas y kits'], entrevista:['Entrevista','Coaching con IA'] };
-
-  // ---- Router ----
-  function show(view){
-    ['dashboard','buscar','guardados','answers','prefs','inbox','docs','entrevista'].forEach(v=>{
-      const el=$('v-'+v); if(el) el.classList.toggle('hidden', v!==view);
-    });
-    document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active', a.dataset.view===view));
-    $('viewTitle').textContent = TITLES[view][0]; $('viewSub').innerHTML = TITLES[view][1];
-    $('side').classList.remove('open');
-    if(view==='guardados') renderSaved();
-    if(view==='answers') renderAnswers();
-    if(view==='prefs') renderPrefs();
-  }
-  document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>show(a.dataset.view)));
-  $('hamb').addEventListener('click',()=>$('side').classList.toggle('open'));
-
-  // ---- Top bar ----
-  function refreshTop(){
-    const s=ApplyrEngine.getState();
-    $('credits').textContent=s.credits; $('mode').value=s.apply_mode;
-    $('kApplied').textContent=s.total_applied||0; $('kFound').textContent=s.jobs.length;
-    $('stateVal').textContent=({idle:'Inactivo',searching:'Buscando…'})[s.status]||s.status;
-    $('cAll').textContent=s.jobs.length; $('nSaved').textContent=ApplyrEngine.getSaved().length;
-    $('statePill').className='pill'+(s.status==='searching'?' on':'');
-    $('statePill').innerHTML='<span class="g"></span> '+(s.status==='searching'?'Buscando':'Inactivo');
-  }
-  $('mode').addEventListener('change',()=>{ ApplyrEngine.setMode($('mode').value); renderQR(); });
-
-  async function runSearch(btn){
-    const s=ApplyrEngine.getState();
-    if(!(s.preferences.titles||[]).length) ApplyrEngine.setPreferences({titles:['Developer','Ingeniero de Software']});
-    if(btn){btn.disabled=true;btn.textContent='Buscando…';}
-    $('statePill').className='pill on'; $('statePill').innerHTML='<span class="g"></span> Buscando';
-    try{ await ApplyrEngine.search(); }catch(e){}
-    if(btn){btn.disabled=false;btn.textContent='Buscar y postular';}
-    qrIndex=0; refreshTop(); renderJobs(); renderQR();
-  }
-  $('searchBtn').addEventListener('click',()=>runSearch($('searchBtn')));
-
-  // ---- Tabs ----
-  document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-    curTab=b.dataset.tab; $('tab-jobs').classList.toggle('hidden',curTab!=='jobs'); $('tab-review').classList.toggle('hidden',curTab!=='review');
-    if(curTab==='review') renderQR();
-  }));
-  document.querySelectorAll('.subtabs button').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.subtabs button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-    curStatus=b.dataset.st; renderJobs();
-  }));
-  $('q').addEventListener('input',renderJobs); $('sort').addEventListener('change',renderJobs);
-
-  // ---- Your Jobs table ----
-  function jobRow(x){
-    const stc={ready:'ready',applied:'applied',declined:'declined'}[x.status]||'ready';
-    const stl={ready:'En cola',applied:'Postulado',declined:'Descartado'}[x.status]||x.status;
-    const ini=(x.company_name||'?').trim().charAt(0).toUpperCase();
-    return `<tr><td><div class="co"><div class="avatar">${ini}</div><div><div style="font-weight:600">${esc(x.company_name||'—')}</div><span class="st ${stc}">${stl}</span></div></div></td>
-      <td>${esc(x.job_title||'')} <span class="match ${fitClass(x.fit_score)}">▲ ${x.fit_score}</span><span class="src">${esc(x.ats||'')}</span></td>
-      <td class="fresh">${ageTxt(x.age_days)}</td>
-      <td><button class="linkbtn" data-open="${esc(x.job_link)}">Abrir ↗</button> · <button class="linkbtn" data-save="${x.id}">${x.saved?'★':'☆'}</button></td></tr>`;
-  }
-  function renderJobs(){
-    const s=ApplyrEngine.getState(); const term=($('q').value||'').toLowerCase(), sort=$('sort').value;
-    let list=s.jobs.filter(x=>!curStatus||x.status===curStatus);
-    if(term) list=list.filter(x=>((x.job_title||'')+' '+(x.company_name||'')).toLowerCase().includes(term));
-    list=[...list].sort((a,b)=> sort==='published_at'?(a.age_days-b.age_days):(b.fit_score-a.fit_score));
-    $('rows').innerHTML = list.length? list.map(jobRow).join('') : '<tr><td colspan="4" class="empty">Sin empleos en esta vista.</td></tr>';
-  }
-
-  // ---- Quick Review ----
-  function renderQR(){
-    const ready=ApplyrEngine.getReady(); const s=ApplyrEngine.getState();
-    if(!ready.length){ $('qr').innerHTML='<div class="qrcard empty">No hay empleos por revisar. Pulsa <b>Buscar y postular</b>.</div>'; return; }
-    if(qrIndex>=ready.length) qrIndex=0;
-    const j=ready[qrIndex];
-    const modeNote = s.apply_mode==='auto' ? '<div class="note">⚡ <b>Auto mode:</b> los de alto fit (≥75) van marcados como recomendados. El envío 100% automático al formulario del ATS llega en la Fase 2; por ahora confírmalos aquí (te abrimos la oferta real).</div>'
-      : s.apply_mode==='hybrid' ? '<div class="note">🔀 <b>Hybrid:</b> te recomendamos los de fit ≥75; tú decides el resto.</div>' : '';
-    const matches=(j.key_matches||[]).map(m=>`<div class="li">✓ ${esc(m)}</div>`).join('')||'<div class="li gap">—</div>';
-    const gaps=(j.key_gaps||[]).map(m=>`<div class="li gap">• ${esc(m)}</div>`).join('')||'<div class="li gap">Sin brechas relevantes</div>';
-    $('qr').innerHTML = `${modeNote}<div class="qrcard">
-      <div class="qrhead"><div><h2>${esc(j.job_title)}${j.recommended?' <span class="src" style="border-color:var(--green);color:var(--green)">recomendado</span>':''}</h2><div class="cmp">${esc(j.company_name||'—')} · <span class="src">${esc(j.ats)}</span> · ${ageTxt(j.age_days)}</div></div>
-        <div class="fitbig ${fitClass(j.fit_score)}">${j.fit_score}/100<br><small>${j.fit_score>=80?'Buen match':j.fit_score>=65?'Match medio':'Match bajo'}</small></div></div>
-      <div class="cols"><div><h4>✓ Coincidencias</h4>${matches}</div><div><h4>Brechas</h4>${gaps}</div></div>
-      <div class="qractions">
-        <button class="btn decline" data-act="decline" data-id="${j.id}">Descartar</button>
-        <button class="btn skip" data-act="skip" data-id="${j.id}">Saltar</button>
-        <button class="btn ghost" data-act="save" data-id="${j.id}">${j.saved?'★ Guardado':'☆ Guardar'}</button>
-        <button class="btn apply" data-act="apply" data-id="${j.id}" data-link="${esc(j.job_link)}">Postular (1 crédito) ↗</button>
-      </div>
-      <p class="sub" style="text-align:center;margin-top:10px">${qrIndex+1} de ${ready.length} · al postular te abrimos la oferta real para completar el envío en el portal.</p></div>`;
-  }
-
-  // ---- Delegación de acciones (Quick Review + tablas) ----
-  document.addEventListener('click',e=>{
-    const t=e.target.closest('[data-act],[data-open],[data-save]'); if(!t) return;
-    if(t.dataset.open){ window.open(t.dataset.open,'_blank','noopener'); return; }
-    if(t.dataset.save){ ApplyrEngine.toggleSave(t.dataset.save); refreshTop(); renderJobs(); renderSaved(); return; }
-    const id=t.dataset.id, act=t.dataset.act;
-    if(act==='apply'){
-      const r=ApplyrEngine.applyJob(id);
-      if(!r.ok && r.error==='sin_creditos'){ alert('Sin créditos. (En el producto final se compran o se ganan por referidos.)'); return; }
-      if(t.dataset.link) window.open(t.dataset.link,'_blank','noopener');
-      refreshTop(); renderJobs(); renderQR();
-    } else if(act==='decline'){ ApplyrEngine.declineJob(id); refreshTop(); renderJobs(); renderQR(); }
-    else if(act==='skip'){ ApplyrEngine.skipJob(id); qrIndex++; renderQR(); }
-    else if(act==='save'){ ApplyrEngine.toggleSave(id); renderQR(); refreshTop(); }
-  });
-
-  // ---- Buscar empleos (vista propia) ----
-  $('bsearch').addEventListener('click',async()=>{
-    const q=($('bq').value||'').split(',').map(x=>x.trim()).filter(Boolean);
-    ApplyrEngine.setPreferences({titles:q.length?q:['Developer'], country:$('bcountry').value||'Chile', remote:true});
-    $('bsearch').disabled=true; $('bsearch').textContent='Buscando…';
-    try{ await ApplyrEngine.search(); }catch(e){}
-    $('bsearch').disabled=false; $('bsearch').textContent='Buscar';
-    const list=ApplyrEngine.getState().jobs.slice(0,50);
-    $('brows').innerHTML = list.length? list.map(jobRow).join('') : '<tr><td colspan="4" class="empty">Sin resultados.</td></tr>';
-    refreshTop(); renderJobs(); renderQR();
-  });
-
-  // ---- Guardados ----
-  function renderSaved(){ const list=ApplyrEngine.getSaved(); $('srows').innerHTML = list.length? list.map(jobRow).join('') : '<tr><td colspan="4" class="empty">Aún no guardas empleos.</td></tr>'; }
-
-  // ---- Answer Library ----
-  function renderAnswers(){
-    const a=ApplyrEngine.getAnswers();
-    $('qalist').innerHTML = a.length? a.map((x,i)=>`<div class="qa"><b style="flex:1">${esc(x.q)}</b><span style="flex:1;color:var(--muted)">${esc(x.a)}</span><button class="linkbtn" data-delqa="${i}">✕</button></div>`).join('') : '<p class="sub">Aún no agregas respuestas.</p>';
-  }
-  $('qaadd').addEventListener('click',()=>{ const q=$('qaq').value.trim(), a=$('qaa').value.trim(); if(!q||!a) return; const arr=ApplyrEngine.getAnswers(); arr.push({q,a}); ApplyrEngine.setAnswers(arr); $('qaq').value='';$('qaa').value=''; renderAnswers(); });
-  document.addEventListener('click',e=>{ const t=e.target.closest('[data-delqa]'); if(!t) return; const arr=ApplyrEngine.getAnswers(); arr.splice(+t.dataset.delqa,1); ApplyrEngine.setAnswers(arr); renderAnswers(); });
-
-  // ---- Preferencias ----
-  function renderPrefs(){
-    const s=ApplyrEngine.getState(), p=s.preferences, pr=s.profile||{};
-    $('prefbody').innerHTML = `<b>Nombre:</b> ${esc(pr.fullname||'—')}<br><b>Roles:</b> ${esc((p.titles||[]).join(', ')||'—')}<br><b>País:</b> ${esc(p.country||'—')} · <b>Remoto:</b> ${p.remote?'sí':'no'}<br><b>Modo:</b> ${esc(s.apply_mode)} · <b>Frescura máx:</b> ${s.max_age_days} días · <b>Fit mínimo:</b> ${s.min_fit}<br><b>Créditos:</b> ${s.credits}`;
-  }
-
-  // init
-  refreshTop(); renderJobs(); renderQR();
-})();
-</script>
+<script src="js/engine.js"></script>
+<script type="module" src="js/auth-guard.js"></script>
+<script src="js/dashboard.js"></script>
 </body>
 </html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>instaWork — Configuración</title>
+  <link rel="stylesheet" href="css/variables.css"/>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/onboarding.css?v=3"/>
+</head>
+<body class="auth-pending">
+  <header>
+    <div class="hbar">
+      <button class="back" onclick="prev()">‹ Atrás</button>
+      <span class="saved" id="saved">Guardado</span>
+      <span class="wizard-logo">insta<span style="color:var(--brand2)">Work</span></span>
+      <span style="width:70px"></span>
+    </div>
+    <div class="prog"><i id="bar"></i></div>
+  </header>
+
+  <main id="view"></main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+  <script src="js/engine.js"></script>
+  <script type="module">
+    import { suggestJobTitles, filterSuggestions, fallbackTitleSuggestions, esc } from './js/ai-titles.js';
+    window.InstaWorkAITitles = { suggestJobTitles, filterSuggestions, fallbackTitleSuggestions, esc };
+  </script>
+  <script type="module" src="js/auth-guard.js"></script>
+  <script src="js/onboarding.js"></script>
+</body>
+</html>
