@@ -5,53 +5,360 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Applyr — Postula en piloto automático</title>
 <style>
-  :root{--brand:#6d28d9;--brand2:#8b5cf6;--ink:#1a1630;--muted:#6b6785;--soft:#f2ecff;--line:#e7e3f2;--green:#16a34a;--greensoft:#e7f7ee}
+  :root{--brand:#6d28d9;--brand2:#7c3aed;--ink:#1a1630;--muted:#6b6785;--line:#e7e3f2;--soft:#f3efff;--bg:#f3f2f7;--green:#16a34a;--greensoft:#e7f7ee;--card:#fff}
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:var(--ink);background:#fff}
-  .nav{display:flex;align-items:center;justify-content:space-between;max-width:1000px;margin:0 auto;padding:20px}
-  .logo{font-weight:800;font-size:22px;color:var(--brand)} .logo span{color:var(--brand2)}
-  .btn{background:var(--brand);color:#fff;border:0;border-radius:24px;padding:12px 22px;font-weight:700;font-size:15px;text-decoration:none;display:inline-block;cursor:pointer}
-  .btn.o{background:#fff;color:var(--brand);border:1px solid var(--line)}
-  .hero{max-width:820px;margin:40px auto 20px;padding:0 20px;text-align:center}
-  .hero h1{font-size:44px;line-height:1.1;letter-spacing:-1px;margin:14px 0}
-  .hero h1 b{color:var(--brand)}
-  .hero p{color:var(--muted);font-size:18px;max-width:600px;margin:0 auto 26px}
-  .pill{display:inline-block;background:var(--greensoft);color:var(--green);font-weight:600;font-size:13px;padding:6px 14px;border-radius:20px}
-  .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:50px auto;padding:0 20px}
-  .feat{border:1px solid var(--line);border-radius:16px;padding:22px}
-  .feat .ic{width:42px;height:42px;border-radius:11px;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .hbar{display:flex;align-items:center;gap:14px;max-width:1000px;margin:0 auto;padding:14px 20px}
+  .back{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-weight:700;font-size:13px;cursor:pointer}
+  .saved{color:var(--muted);font-size:12px}
+  .logo{margin-left:auto;margin-right:auto;font-weight:800;color:var(--brand);font-size:20px}
+  .prog{height:6px;background:var(--line)}
+  .prog > i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;transition:width .35s ease}
+  main{max-width:660px;margin:0 auto;padding:38px 20px 120px}
+  h1{font-size:30px;text-align:center;margin:8px 0 6px;letter-spacing:-.5px}
+  .sub{text-align:center;color:var(--muted);font-size:15px;line-height:1.5;margin:0 auto 18px;max-width:520px}
+  .reuse{display:block;width:max-content;margin:0 auto 20px;background:var(--soft);color:var(--brand);font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 30px rgba(30,15,60,.05)}
+  label{display:block;font-weight:600;font-size:13px;margin:14px 0 6px}
+  .hint{color:var(--muted);font-weight:400;font-size:12.5px;margin-bottom:6px}
+  input[type=text],input[type=tel],input[type=url],input[type=date],input[type=number],input[type=email],select,textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px 13px;font-size:14px;font-family:inherit;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)}
+  .drop{border:2px dashed var(--line);border-radius:16px;padding:42px;text-align:center;cursor:pointer}
+  .drop.filled{border-color:var(--green);background:var(--greensoft)}
+  .drop .ic{width:56px;height:56px;border-radius:50%;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px}
+  .drop b{font-size:18px} .drop small{color:var(--muted);display:block;margin-top:6px}
+  .segw{display:flex;justify-content:center;margin-bottom:18px}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:24px;padding:4px}
+  .seg button{border:0;background:none;padding:8px 16px;border-radius:20px;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--soft);color:var(--brand)}
+  .btn{width:100%;border:0;border-radius:24px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.skip{background:#ececf2;color:var(--ink);margin-top:10px}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:6px 0 16px}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .tile .ic{width:34px;height:34px;border-radius:9px;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+  .tile b{font-size:12.5px} .tile small{color:var(--muted);font-size:11px;display:block;margin-top:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chip{border:1px solid var(--brand);color:var(--brand);background:#fff;border-radius:20px;padding:6px 12px;font-size:12.5px;cursor:pointer;user-select:none}
+  .chip.off{border-color:var(--line);color:var(--muted)}
+  .modecard{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;position:relative}
+  .modecard.on{border-color:var(--brand);background:#fbfaff;box-shadow:0 0 0 1px var(--brand) inset}
+  .modecard .t{display:flex;align-items:center;gap:8px;font-weight:700}
+  .modecard .tag{font-size:11px;font-weight:600;color:var(--green);background:var(--greensoft);padding:2px 8px;border-radius:20px}
+  .modecard p{color:var(--muted);font-size:13px;margin:8px 0 0}
+  .modecard .rd{position:absolute;top:16px;right:16px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line)}
+  .modecard.on .rd{border-color:var(--brand);background:var(--brand)}
+  .rowcard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
+  .rowcard .top{display:flex;justify-content:space-between;font-weight:700;font-size:14px}
+  .addbtn{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--brand);cursor:pointer}
+  .count{color:var(--muted);font-size:12px;float:right}
+  .spin{width:54px;height:54px;border-radius:50%;border:4px solid var(--soft);border-top-color:var(--brand);margin:10px auto;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .check{width:90px;height:90px;border-radius:50%;background:var(--greensoft);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px auto}
+  .tasklist{margin-top:14px} .tasklist div{display:flex;align-items:center;gap:8px;padding:6px 0;color:var(--muted);font-size:14px}
+  .tasklist div.done{color:var(--ink)} .tasklist .b{color:var(--green)}
+  .cfg{max-width:660px;margin:0 auto;padding:6px 20px;color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .cfg input{border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:12px;width:auto}
+  /* Landing */
+  #screen-landing{max-width:1000px;margin:0 auto;padding:0 20px}
+  .lnav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+  .llogo{font-weight:800;font-size:22px;color:var(--brand)}
+  .lbtn{background:var(--brand);color:#fff;border:0;border-radius:24px;padding:12px 22px;font-weight:700;font-size:15px;cursor:pointer}
+  .lhero{text-align:center;padding:24px 0 6px}
+  .lhero .pill{display:inline-block;background:var(--greensoft);color:var(--green);font-weight:600;font-size:13px;padding:6px 14px;border-radius:20px}
+  .lhero h2{font-size:44px;line-height:1.1;letter-spacing:-1px;margin:14px 0;text-align:center}
+  .lhero h2 span{color:var(--brand)}
+  .lhero p{color:var(--muted);font-size:18px;max-width:600px;margin:0 auto 24px}
+  .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:44px 0}
+  .feat{border:1px solid var(--line);border-radius:16px;padding:22px;background:#fff}
+  .feat .fi{width:42px;height:42px;border-radius:11px;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
   .feat h3{margin:0 0 6px;font-size:16px} .feat p{margin:0;color:var(--muted);font-size:14px}
-  .cta{max-width:1000px;margin:20px auto 60px;padding:36px 20px;text-align:center;background:var(--soft);border-radius:20px}
-  .cta h2{font-size:28px;margin:0 0 8px} .cta p{color:var(--muted);margin:0 0 20px}
-  footer{text-align:center;color:var(--muted);font-size:13px;padding:30px}
-  @media(max-width:760px){.feats{grid-template-columns:1fr}.hero h1{font-size:32px}}
+  #dashFrame{position:fixed;inset:0;width:100%;height:100%;border:0;background:var(--bg);z-index:50}
+  @media(max-width:760px){.feats{grid-template-columns:1fr}.lhero h2{font-size:32px}}
 </style>
 </head>
 <body>
-  <div class="nav">
-    <div class="logo">appl<span>yr</span>*</div>
-    <a class="btn" href="onboarding.html">Comenzar a postular</a>
-  </div>
 
-  <section class="hero">
+<!-- ===== LANDING ===== -->
+<div id="screen-landing">
+  <div class="lnav"><div class="llogo">appl<span style="color:var(--brand2)">yr</span>*</div><button class="lbtn" onclick="showScreen('login')">Comenzar a postular</button></div>
+  <div class="lhero">
     <span class="pill">★ Enfocado en Chile y LATAM</span>
-    <h1>Deja de postular por semanas.<br><b>Postula en piloto automático.</b></h1>
+    <h2>Deja de postular por semanas.<br><span>Postula en piloto automático.</span></h2>
     <p>Applyr busca empleos frescos que encajan contigo en las mejores bolsas (GetOnBoard, ATS internacionales) y te ayuda a postular en minutos, no en horas.</p>
-    <a class="btn" href="onboarding.html">Comenzar a postular →</a>
-  </section>
+    <button class="lbtn" onclick="showScreen('login')">Comenzar a postular →</button>
+  </div>
+  <div class="feats">
+    <div class="feat"><div class="fi">🔍</div><h3>Bolsa agregada</h3><p>Rastreamos GetOnBoard (CL), RemoteOK, Greenhouse, Ashby y Lever en una sola búsqueda.</p></div>
+    <div class="feat"><div class="fi">⚡</div><h3>Regla de oro</h3><p>Solo empleos recientes (≤ 21 días) y relevantes. Nada viejo ni irrelevante.</p></div>
+    <div class="feat"><div class="fi">🎯</div><h3>Match con fit score</h3><p>Cada empleo con su porcentaje de encaje, coincidencias y brechas.</p></div>
+  </div>
+</div>
 
-  <section class="feats">
-    <div class="feat"><div class="ic">🔍</div><h3>Bolsa agregada</h3><p>Rastreamos GetOnBoard (CL), RemoteOK, Greenhouse, Ashby y Lever en una sola búsqueda.</p></div>
-    <div class="feat"><div class="ic">⚡</div><h3>Regla de oro</h3><p>Solo empleos recientes (≤ 21 días) y relevantes. Nada viejo ni irrelevante.</p></div>
-    <div class="feat"><div class="ic">🎯</div><h3>Match con fit score</h3><p>Cada empleo con su porcentaje de encaje, coincidencias y brechas.</p></div>
-  </section>
+<!-- ===== LOGIN ===== -->
+<div id="screen-login" style="display:none">
+  <div style="text-align:center;padding:26px"><span class="llogo">appl<span style="color:var(--brand2)">yr</span>*</span></div>
+  <div style="max-width:420px;margin:20px auto 60px;padding:0 20px;text-align:center">
+    <div class="card" style="padding:30px">
+      <h1 style="font-size:26px;margin:0 0 6px">Bienvenido a Applyr</h1>
+      <p class="sub" style="margin-bottom:20px">Inicia sesión para empezar tu búsqueda automática.</p>
+      <div id="gbtn" style="display:flex;justify-content:center;margin-bottom:14px"></div>
+      <button id="ggeneric" class="btn primary" style="margin-top:0">Continuar con Google</button>
+      <div style="color:var(--muted);font-size:12px;margin:14px 0">o</div>
+      <input id="gemail" type="email" placeholder="tu@email.com"/>
+      <button id="gemailbtn" class="btn skip">Continuar con email</button>
+      <p class="sub" style="font-size:11px;margin-top:14px">Al continuar aceptas los Términos y la Política de Privacidad.</p>
+    </div>
+  </div>
+</div>
 
-  <section class="cta">
-    <h2>Tu próxima entrevista empieza hoy</h2>
-    <p>Crea tu cuenta y deja que Applyr encuentre y priorice tus mejores oportunidades.</p>
-    <a class="btn" href="onboarding.html">Empezar gratis</a>
-  </section>
+<!-- ===== WIZARD ===== -->
+<div id="screen-wizard" style="display:none">
+  <header>
+    <div class="hbar">
+      <button class="back" onclick="prev()">‹ Atrás</button>
+      <span class="saved" id="saved">Guardado</span>
+      <span class="logo">appl<span style="color:var(--brand2)">yr</span>*</span>
+      <span style="width:70px"></span>
+    </div>
+    <div class="prog"><i id="bar"></i></div>
+  </header>
+  <main id="view"></main>
+</div>
 
-  <footer>© 2026 Applyr · Hecho en Chile · <a href="onboarding.html" style="color:var(--brand)">Ingresar</a></footer>
+<!-- ===== DASHBOARD (marco a pantalla completa, misma URL) ===== -->
+<iframe id="dashFrame" style="display:none"></iframe>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}</script>
+<script src="engine.js?v=8"></script>
+<script>
+// ===== Router de pantallas (todo en la misma URL) =====
+function showScreen(name){
+  ['landing','login','wizard'].forEach(s=>{ const el=document.getElementById('screen-'+s); if(el) el.style.display=(s===name)?'block':'none'; });
+  const f=document.getElementById('dashFrame');
+  if(name==='dashboard'){ f.style.display='block'; if(!f.getAttribute('src')) f.src='dashboard.html?e='+Date.now(); }
+  else { f.style.display='none'; }
+  window.scrollTo(0,0);
+}
+// volver del tablero al asistente si el iframe lo pide
+window.addEventListener('message',e=>{ if(e.data==='applyr:edit-profile'){ showScreen('wizard'); render(); } });
+
+// ===== Login =====
+const GOOGLE_CLIENT_ID = "";
+function decodeJwt(t){ try{ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }catch(e){ return {}; } }
+function enterApp(profile){ try{ ApplyrEngine.setProfile(profile); }catch(e){} showScreen('wizard'); render(); }
+function onGoogle(resp){ const p=decodeJwt(resp.credential); enterApp({ fullname:p.name||'', email:p.email||'', picture:p.picture||'', sub:p.sub||'', provider:'google' }); }
+window.addEventListener('load',()=>{
+  if(GOOGLE_CLIENT_ID && window.google && google.accounts){
+    google.accounts.id.initialize({ client_id:GOOGLE_CLIENT_ID, callback:onGoogle });
+    google.accounts.id.renderButton(document.getElementById('gbtn'),{theme:'outline',size:'large',width:340,text:'continue_with'});
+    document.getElementById('ggeneric').style.display='none';
+  }
+});
+document.getElementById('ggeneric').addEventListener('click',()=>{ enterApp({ fullname:'', email:'', provider:'google-demo' }); });
+document.getElementById('gemailbtn').addEventListener('click',()=>{ const e=document.getElementById('gemail').value.trim(); if(!/^[^@]+@[^@]+\.[^@]+$/.test(e)){ alert('Email inválido'); return; } enterApp({ email:e, provider:'email' }); });
+
+// ===== Asistente (wizard) =====
+const S = { source:'resume', titles:[], mode:'auto', notify:{} };
+let step = 0;
+const view = document.getElementById('view');
+
+const STEPS = [
+ ()=>`<h1>Antes de continuar, revisa estos términos</h1>
+   <div class="card"><b>Applyr — Acuerdo de Usuario y Términos de Auto-Apply</b>
+   <p class="hint">Versión: v1.0 · Actualizado: hoy<br>Al continuar, confirmas que has leído, entendido y aceptas este Acuerdo. Si no estás de acuerdo, no continúes.</p>
+   <p style="font-size:13px"><b>1. Alcance.</b> Este Acuerdo regula Auto-Apply, que encuentra vacantes en plataformas de terceros (ATS/bolsas) y —según tus instrucciones— redacta y envía postulaciones usando modelos de lenguaje (LLMs).</p>
+   <p style="font-size:13px"><b>2. Servicio automatizado; límites.</b> Auto-Apply opera con mejor esfuerzo usando datos que provees, plataformas de terceros y sistemas de IA. No garantizamos entrevistas ni ofertas.</p></div>
+   <button class="btn primary" onclick="next()">Continuar a Auto Apply</button>`,
+ ()=>{ const isLi=S.source==='linkedin'; return `<h1>Sube tu CV</h1><p class="sub">Tu CV muestra a los empleadores tus habilidades y experiencia, y muchas veces decide si avanzas.</p>
+   <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
+   <div class="segw"><div class="seg">
+     <button class="${!isLi?'on':''}" onclick="setSource('resume')">Subir CV</button>
+     <button class="${isLi?'on':''}" onclick="setSource('linkedin')">Traer de LinkedIn</button>
+   </div></div>
+   ${ isLi
+     ? `<div class="card"><label style="display:block;font-weight:600;font-size:13px;margin-bottom:6px">Pega tu URL de LinkedIn</label>
+        <input type="url" id="linkedinUrl" data-k="linkedin" placeholder="https://www.linkedin.com/in/tu-perfil" value="${S.linkedin||''}"/>
+        <p class="hint" style="margin-top:8px">Guardamos tu perfil de LinkedIn para reutilizarlo en tus postulaciones.</p></div>
+        <button class="btn primary" onclick="saveLinkedin()">Continuar →</button>`
+     : `<input type="file" id="cvInput" accept=".pdf,.doc,.docx" style="display:none" onchange="handleCv(this)"/>
+        <div class="card"><div class="drop ${S.cv?'filled':''}" onclick="document.getElementById('cvInput').click()">
+          <div class="ic">${S.cv?'✓':'⤓'}</div><b>${S.cv?S.cv:'Haz clic para subir tu CV'}</b><small>${S.cvMsg||'PDF, DOC o DOCX'}</small></div></div>
+        ${S.cv?'<button class="btn primary" onclick="next()">Continuar →</button>':'<button class="btn skip" onclick="next()">Omitir por ahora</button>'}`
+   }`},
+ ()=>{ const my=step; setTimeout(()=>{ if(step===my) next(); }, 1500);
+   const sk=(S.cvSkills||[]);
+   const body = sk.length
+     ? '<b>Detectamos '+sk.length+' habilidades en tu CV:</b><div class="chips" style="margin-top:8px">'+sk.slice(0,14).map(s=>'<span class="chip">'+s+'</span>').join('')+'</div><p class="hint" style="margin-top:10px">Las usaremos para priorizar tus mejores coincidencias.</p>'
+     : (S.cv ? '<b>CV recibido.</b><p class="hint" style="margin-top:6px">No pudimos extraer habilidades automáticamente (puede ser un PDF escaneado como imagen). Igual lo guardamos.</p>' : '<b>Sin CV.</b><p class="hint">Puedes subirlo luego desde Preferencias.</p>');
+   return `<h1>Leyendo tu CV</h1><p class="sub">Extraemos la información clave de tu CV para priorizar tus postulaciones.</p>
+   <div class="spin"></div><div class="card">${body}${S.cvChars?('<p class="hint" style="margin-top:8px">~'+S.cvChars+' caracteres leídos.</p>'):''}</div>`},
+ ()=>{ const t=(S.titles&&S.titles.length)?S.titles:inferTitles(S.cvSkills||[]); S.titles=t; const src=(S.cvSkills&&S.cvSkills.length)?'a partir de tu CV':'sugeridos'; return `<h1>¿Qué puestos buscas?</h1><p class="sub">Detectamos estos roles ${src}. Edítalos si quieres — separa con comas.</p>
+   <div class="card">
+     <label>Roles que buscas</label>
+     <input type="text" id="titlesInput" value="${t.join(', ')}" placeholder="Developer, Diseñador UX, Product Manager…"/>
+     <label>País de búsqueda</label>
+     <select id="paisBusqueda" data-k="pais_busqueda"><option${(!S.country||S.country==='Chile')?' selected':''}>Chile</option><option${S.country==='Argentina'?' selected':''}>Argentina</option><option${S.country==='Perú'?' selected':''}>Perú</option><option${S.country==='Colombia'?' selected':''}>Colombia</option><option${S.country==='México'?' selected':''}>México</option><option${S.country==='Remoto'?' selected':''}>Remoto</option></select>
+   </div><button class="btn primary" onclick="saveTitles()">Continuar →</button>`},
+ ()=>`<h1>Sube una foto de perfil</h1><p class="sub">Algunas postulaciones pueden pedir una foto de perfil. Sube una imagen clara en formato PNG, JPG o JPEG.</p>
+   <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
+   <div class="card"><div class="drop ${S.photo?'filled':''}" onclick="document.getElementById('photoInput').click()"><div class="ic">${S.photo?'✓':'👤'}</div><b>${S.photo?S.photo:'Haz clic para subir'}</b><small>${S.photo?'Foto cargada':'PNG, JPG, JPEG'}</small></div></div>
+   <button class="btn primary" onclick="next()">Continuar →</button><button class="btn skip" onclick="next()">Omitir</button>`,
+ ()=>`<h1>¿Cuáles son tus datos personales?</h1><p class="sub">Usamos esta información para emparejarte con empleos y para que los empleadores te contacten.</p>
+   <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
+   <div class="card">
+     <label>¿Cuál es tu nombre completo?</label><input type="text" id="fullname" placeholder="Nombre y apellidos"/>
+     <label>URL de LinkedIn</label><input type="url" id="linkedin" placeholder="www.linkedin.com/in/tu-perfil"/>
+     <label>Teléfono</label><input type="tel" id="phone" placeholder="+56 9 ..."/>
+     <label>¿Cuándo naciste?</label><input type="date" id="dob"/>
+   </div><button class="btn primary" onclick="next()">Continuar →</button>`,
+ ()=>`<h1>¿Dónde vives?</h1><p class="sub">Es tu dirección de residencia, requerida para postulaciones y registros. NO se usará para influir en tus preferencias de búsqueda.</p>
+   <div class="card"><label>Dirección</label><input type="text" id="address" placeholder="Calle y número"/>
+     <label>Ciudad</label><input type="text" id="city" placeholder="Ciudad"/>
+     <label>País</label><select id="pais" data-k="pais"><option>Chile</option><option>Argentina</option><option>Perú</option><option>Colombia</option><option>México</option></select>
+     <label>Código postal</label><input type="text" id="zip" placeholder="10001"/>
+   </div><button class="btn primary" onclick="next()">Continuar →</button>`,
+ ()=>`<h1>Cuéntanos sobre tu experiencia</h1><p class="sub">Estos datos de tu CV nos ayudan a referenciar tu perfil en las postulaciones.</p>
+   <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Experiencia <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <div class="card" style="margin-top:12px"><div class="top" style="display:flex;justify-content:space-between"><b>Educación <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <div class="card" style="margin-top:12px"><div class="top" style="display:flex;justify-content:space-between"><b>Habilidades <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <button class="btn primary" onclick="next()">Continuar →</button>`,
+ ()=>`<h1>¿Tienes referencias de empleadores anteriores?</h1><p class="sub">Agregar referencias profesionales ayuda a los empleadores a verificar tu experiencia y mejora tu postulación.</p>
+   <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Referencias profesionales <span class="hint">(Opcional)</span></b><button class="addbtn">+ Agregar</button></div></div>
+   <button class="btn primary" onclick="next()">Continuar →</button><button class="btn skip" onclick="next()">Omitir</button>`,
+ ()=>`<h1>¿Quieres excluir ciertas empresas?</h1><p class="sub">Indica las empresas que quieres excluir de tus resultados de búsqueda.</p>
+   <div class="card"><label>Nombre de la empresa <span class="count">0/5</span></label><input type="text" id="exclude" placeholder='Por ejemplo "Google"'/>
+   <p class="hint" style="margin-top:10px">Los empleos de las empresas excluidas no aparecerán en tu búsqueda.</p></div>
+   <button class="btn primary" onclick="next()">Continuar →</button><button class="btn skip" onclick="next()">Omitir</button>`,
+ ()=>`<h1>Cuéntanos sobre ti</h1><p class="sub">Pedimos tu etnia, nacionalidad y género para promover una contratación inclusiva y mejores coincidencias.</p>
+   <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
+   <div class="card">
+     <label>¿Qué describe mejor tu raza o etnia?</label>
+     <select id="etnia" data-k="etnia"><option>Prefiero no decir</option><option>Latino/Hispano</option><option>Mestizo</option><option>Blanco</option><option>Afrodescendiente</option><option>Indígena / Pueblos originarios</option><option>Asiático</option><option>Medio Oriente / Norte de África</option><option>Otra</option></select>
+     <label>¿Cuál es tu nacionalidad?</label>
+     <select id="nacionalidad" data-k="nacionalidad"><option>Prefiero no decir</option><option>Chilena</option><option>Argentina</option><option>Peruana</option><option>Colombiana</option><option>Venezolana</option><option>Boliviana</option><option>Ecuatoriana</option><option>Mexicana</option><option>Española</option><option>Otra</option></select>
+     <label>¿Cómo describirías tu orientación sexual?</label>
+     <select id="orientacion" data-k="orientacion"><option>Prefiero no entregar esta información</option><option>Heterosexual</option><option>Homosexual (gay/lesbiana)</option><option>Bisexual</option><option>Otra</option></select>
+     <label>¿Te identificas como transgénero?</label>
+     <select id="transgenero" data-k="transgenero"><option>Prefiero no entregar esta información</option><option>No</option><option>Sí</option></select>
+   </div><button class="btn primary" onclick="next()">Continuar →</button>`,
+ ()=>`<h1>Crea tu bandeja de Auto Apply</h1><p class="sub">Una bandeja dedicada nos deja gestionar tu búsqueda de punta a punta mientras tu correo personal queda limpio.</p>
+   <div class="tiles">
+     <div class="tile"><div class="ic">🛡</div><b>Anti-spam</b><small>Bloquea estafas</small></div>
+     <div class="tile"><div class="ic">▤</div><b>Auto-orden</b><small>Clasifica cada correo</small></div>
+     <div class="tile"><div class="ic">🤖</div><b>Sin manos</b><small>Maneja códigos OTP</small></div>
+     <div class="tile"><div class="ic">🔔</div><b>Notificado</b><small>Updates clave a tu correo</small></div>
+   </div>
+   <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Notificarme en mi correo personal</b><span>🟣</span></div>
+   <div class="chips">${['Invitaciones a entrevista','Ofertas y contrataciones','Seguimientos de entrevista','Invitaciones a assessment','Resultados de assessment','Confirmaciones de postulación','Rechazos','Formularios de igualdad','Otros updates'].map(c=>`<span class="chip">${c}</span>`).join('')}</div></div>
+   <button class="btn primary" onclick="next()">Guardar y continuar</button>`,
+ ()=>`<h1>¿Cómo debemos postular por ti?</h1>
+   <div class="card">
+     ${modeCard('hybrid','Modo Híbrido','Lo mejor de ambos','Mejor equilibrio entre velocidad y control. Auto-postulamos a roles de alto match (75%+). Tú decides el resto.')}
+     ${modeCard('auto','Modo Auto','Ahorra tiempo, sin aprobación','Totalmente sin manos. Máxima velocidad. Nuestro agente encuentra y postula por ti.')}
+     ${modeCard('review','Modo Revisión','Aprueba cada empleo','Control total. Nada se envía sin tu aprobación. Revisa cada coincidencia.')}
+   </div><button class="btn primary" onclick="genKit()">Continuar →</button>`,
+ ()=>{genAnim();return `<h1>Generando tu kit de postulación</h1><p class="sub">Esto suele tardar unos segundos</p>
+   <div class="card"><div class="spin"></div><div class="tasklist" id="genlist">
+     <div id="g0">◦ Generando carta de presentación</div><div id="g1">◦ Generando CV</div>
+     <div id="g2">◦ Generando email de seguimiento</div><div id="g3">◦ Buscando empleos que coinciden</div>
+   </div><p class="hint" style="text-align:center">🛡 Tus datos se procesan de forma segura.</p></div>`},
+ ()=>`<div class="check">✓</div><h1>¡Todo listo!</h1><p class="sub">Tu Auto-Apply está activo. Empezamos a buscar empleos para ti de inmediato.</p>
+   <div class="card"><b>Tu búsqueda ya está corriendo</b><div class="tasklist">
+     <div class="done"><b class="b">Ahora ·</b> Revisión de perfil</div><div>~10 min · Primeras postulaciones</div><div>3–5 días · Respuestas en tu bandeja</div>
+   </div><p class="hint">Buscamos empleos frescos en ATS (Greenhouse, Ashby, Lever) + GetOnBoard (CL) donde eres top match.</p></div>
+   <button class="btn primary" onclick="goDash()">Ir a mi tablero →</button>`
+];
+
+function modeCard(id,t,tag,desc){return `<div class="modecard ${S.mode===id?'on':''}" onclick="setMode('${id}')"><div class="rd"></div><div class="t">${t} <span class="tag">${tag}</span></div><p>${desc}</p></div>`}
+function setMode(m){S.mode=m;render()}
+function setSource(s){ S.source=s; render(); }
+// Inferir roles a partir de las habilidades del CV (como AIApply)
+function inferTitles(skills){ const s=(skills||[]).map(x=>x.toLowerCase()); const has=(...k)=>k.some(x=>s.includes(x)); const t=[];
+  if(has('react','vue','angular','javascript','typescript')) t.push('Frontend Developer');
+  if(has('node','node.js','python','django','flask','java','php','laravel','go','golang','.net','c#')) t.push('Backend Developer');
+  if(has('react','node','javascript','typescript')&&has('python','java','php','node')) t.push('Full-Stack Developer');
+  if(has('figma','ux','ui')) t.push('Diseñador UX/UI');
+  if(has('wordpress','shopify','woocommerce')) t.push('Desarrollador Web');
+  if(has('seo','sem','google ads','meta ads','marketing','google analytics')) t.push('Marketing Digital');
+  if(has('excel','power bi','tableau','sql')) t.push('Analista de Datos');
+  if(has('scrum','agile','jira','notion')) t.push('Project Manager');
+  if(has('salesforce','hubspot','ventas')) t.push('Ejecutivo Comercial');
+  if(!t.length) t.push('Developer','Ingeniero de Software');
+  return [...new Set(t)].slice(0,5);
+}
+function saveTitles(){ const i=document.getElementById('titlesInput'); const v=(i&&i.value||'').split(',').map(x=>x.trim()).filter(Boolean); S.titles=v.length?v:['Developer']; const p=document.getElementById('paisBusqueda'); S.country=(p&&p.value)||'Chile'; try{ApplyrEngine.setPreferences({titles:S.titles,country:S.country,remote:true});}catch(e){} next(); }
+// --- MEMORIA: persistir/restaurar el asistente ---
+function persist(){ try{ localStorage.setItem('applyr_wizard', JSON.stringify({S, step, loggedIn:true})); }catch(e){} }
+function restore(){ try{ const w=JSON.parse(localStorage.getItem('applyr_wizard')); if(w&&w.S){ Object.assign(S,w.S); step=(typeof w.step==='number')?w.step:0; return true; } }catch(e){} return false; }
+function saveLinkedin(){ const el=document.getElementById('linkedinUrl'); const v=(el&&el.value||'').trim(); if(v && !/linkedin\.com/i.test(v)){ alert('Pega una URL válida de LinkedIn (linkedin.com/in/...)'); return; } if(v){ S.linkedin=v; try{ApplyrEngine.setProfile({linkedin:v});}catch(e){} } next(); }
+function handlePhoto(input){ const f=input.files&&input.files[0]; if(f){ S.photo=f.name; try{ApplyrEngine.setProfile({photoName:f.name});}catch(e){} render(); } }
+
+const SKILL_DICT=['javascript','typescript','react','vue','angular','node.js','node','python','java','php','laravel','wordpress','shopify','woocommerce','sql','postgresql','mysql','mongodb','aws','azure','gcp','docker','kubernetes','git','html','css','tailwind','bootstrap','django','flask','fastapi','spring','.net','c#','c++','golang','go','rust','kotlin','swift','flutter','react native','figma','ux','ui','seo','sem','google analytics','google ads','meta ads','excel','power bi','tableau','scrum','agile','jira','notion','marketing','ventas','contabilidad','photoshop','illustrator','autocad','salesforce','hubspot'];
+function extractSkills(t){ const low=(t||'').toLowerCase(); const out=[]; SKILL_DICT.forEach(s=>{ if(low.includes(s)&&!out.includes(s)) out.push(s); }); return out; }
+async function handleCv(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  S.cv=f.name; S.cvMsg='Leyendo…'; render();
+  let text='';
+  try{
+    if(/\.pdf$/i.test(f.name) && window.pdfjsLib){
+      const buf=await f.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+      const n=Math.min(pdf.numPages,8);
+      for(let i=1;i<=n;i++){ const pg=await pdf.getPage(i); const tc=await pg.getTextContent(); text+=' '+tc.items.map(x=>x.str).join(' '); }
+    } else { try{ text=await f.text(); }catch(e){ text=''; } }
+  }catch(e){ text=''; }
+  const skills=extractSkills(text);
+  S.cvText=(text||'').slice(0,5000); S.cvSkills=skills; S.cvChars=(text||'').length; S.cvMsg='Leído ✓';
+  try{ ApplyrEngine.setProfile({cvName:f.name, cvSkills:skills, cvChars:S.cvChars}); if(skills.length) ApplyrEngine.setPreferences({skills}); }catch(e){}
+  render();
+}
+function genAnim(){ const my=step; [0,1,2,3].forEach(i=>setTimeout(()=>{const e=document.getElementById('g'+i);if(e){e.innerHTML=e.innerHTML.replace('◦','<span class="b">✓</span>');e.classList.add('done')}},600*(i+1))); setTimeout(()=>{ if(step===my) next(); },3000); }
+
+function captureCurrent(){
+  const data={};
+  view.querySelectorAll('input,select,textarea').forEach(el=>{ if(el.type==='file'||!el.value) return; const k=el.id||el.getAttribute('data-k'); if(k) data[k]=el.value; });
+  if(Object.keys(data).length){ S.form={...(S.form||{}),...data}; try{ApplyrEngine.setProfile(data);}catch(e){} }
+}
+function render(){
+  view.innerHTML = STEPS[step]();
+  // MEMORIA: repoblar campos vacíos con lo ya guardado
+  if(S.form) view.querySelectorAll('input,select,textarea').forEach(el=>{ if(el.type==='file'||el.value) return; const k=el.id||el.getAttribute('data-k'); if(k && S.form[k]!=null) el.value=S.form[k]; });
+  document.getElementById('bar').style.width = Math.round((step/(STEPS.length-1))*100)+'%';
+  document.getElementById('saved').textContent = 'Guardado hace instantes';
+  persist();
+  window.scrollTo(0,0);
+}
+function next(){ captureCurrent(); if(step<STEPS.length-1){step++;render()} }
+function prev(){ captureCurrent(); if(step>0){step--;render()} else { showScreen('login'); } }
+
+async function genKit(){ captureCurrent();
+  const titles=(S.titles&&S.titles.length)?S.titles:['Developer','Ingeniero de Software'];
+  const skills=(S.cvSkills||[]);
+  next();
+  try{
+    ApplyrEngine.setPreferences({ titles, country:(S.country||'Chile'), remote:true, skills });
+    ApplyrEngine.setMode(S.mode);
+    await ApplyrEngine.search();
+  }catch(e){}
+}
+function goDash(){ try{localStorage.setItem('applyr_done','1');}catch(e){} const f=document.getElementById('dashFrame'); f.src='dashboard.html?e='+Date.now(); showScreen('dashboard'); }
+
+document.addEventListener('click',e=>{
+  const seg=e.target.closest('.seg button'); if(seg && seg.closest('#screen-wizard')){ /* setSource ya re-renderiza */ }
+  const chip=e.target.closest('#view .chip'); if(chip){ chip.classList.toggle('off'); }
+  const add=e.target.closest('.addbtn'); if(add){ e.preventDefault(); const card=add.closest('.card'); if(card){ const inp=document.createElement('input'); inp.type='text'; inp.placeholder='Escribe aquí…'; inp.style.cssText='width:100%;margin-top:8px'; card.appendChild(inp); inp.focus(); } }
+});
+
+// Arranque: retomar donde quedó (memoria). Si ya terminó el onboarding → tablero.
+render();
+if(restore()){
+  if(localStorage.getItem('applyr_done')==='1'){ goDash(); }
+  else { showScreen('wizard'); render(); }
+} else { showScreen('landing'); }
+</script>
 </body>
 </html>
