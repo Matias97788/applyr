@@ -26,10 +26,25 @@ function esc(s) {
 function hasPhrase(hay, phrase) {
   const p = norm(phrase);
   if (!p) return false;
-  const esc = p.replace(/[.*+?^d{}()|[\]\\]/g, '\\$&');
+  const esc = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp('(^|[^a-z0-9+#.])' + esc + '([^a-z0-9+#]|$)');
   return re.test(hay);
 }
+
+function firstIndex(hay, phrase) {
+  const p = norm(phrase);
+  if (!p) return -1;
+  const esc = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('(^|[^a-z0-9+#.])' + esc + '([^a-z0-9+#]|$)');
+  const m = re.exec(hay);
+  return m ? m.index : -1;
+}
+function recencyWeight(idx, L) {
+  if (idx < 0) return 0;
+  const p = L > 0 ? idx / L : 0;
+  return p < 0.33 ? 1.6 : (p < 0.66 ? 1.0 : 0.5);
+}
+const GENERIC_KW = new Set(['ventas','atencion al cliente','servicio al cliente','operaciones','mantenimiento','administracion','office','excel','proyectos','equipo','kpi','presupuesto','agenda','reportes','b2b','b2c','crm','contenido']);
 
 // ---------- TAXONOMÍA DE HABILIDADES ----------
 // [displayName, categoria, ...alias]
@@ -41,7 +56,7 @@ const SKILLS = [
   ['Node.js','tech','node.js','nodejs','node'],['Python','tech','python'],['Java','tech','java'],
   ['PHP','tech','php'],['Laravel','tech','laravel'],['Symfony','tech','symfony'],
   ['Ruby','tech','ruby','rails','ruby on rails'],['Go','tech','golang','go'],['Rust','tech','rust'],
-  ['C#','tech','c#','.net','dotnet','asp.net'],['C++','tech','c++'],['C','tech'],
+  ['C#','tech','c#','.net','dotnet','asp.net'],['C++','tech','c++'],
   ['Kotlin','tech','kotlin'],['Swift','tech','swift'],['Flutter','tech','flutter','dart'],
   ['React Native','tech','react native'],['Django','tech','django'],['Flask','tech','flask'],
   ['FastAPI','tech','fastapi'],['Spring','tech','spring','spring boot'],['Express','tech','express'],
@@ -197,6 +212,9 @@ const SKILLS = [
 // ---------- ONTOLOGÍA DE PUESTOS ----------
 // { t:'Título mostrado', c:'categoria', title:[frases fuertes], kw:[señales] }
 const ROLES = [
+  // Dirección / Gerencia
+  { t:'Country Manager / Gerente General', c:'exec', title:['country manager','general manager','gerente general','director general','gerente de pais','gerente pais'], kw:['estrategia','expansion','operaciones','presupuesto','equipo'] },
+  { t:'Head of Marketing / CMO', c:'marketing', title:['head of marketing','cmo','chief marketing officer','director de marketing','directora de marketing','gerente de marketing','jefe de marketing','marketing manager'], kw:['marketing digital','branding','growth','estrategia de marketing','presupuesto'] },
   // Tech
   { t:'Frontend Developer', c:'tech', title:['frontend','front end','front-end','desarrollador frontend'], kw:['react','vue','angular','javascript','typescript','html','css','tailwind','next.js'] },
   { t:'Backend Developer', c:'tech', title:['backend','back end','back-end','desarrollador backend'], kw:['node.js','python','java','php','laravel','django','spring','.net','go','rest','sql','express'] },
@@ -223,7 +241,7 @@ const ROLES = [
   { t:'Scrum Master', c:'pm', title:['scrum master','agile coach'], kw:['scrum','agile','kanban'] },
   // Marketing / Ventas
   { t:'Marketing Digital', c:'marketing', title:['marketing digital','digital marketing','especialista en marketing'], kw:['seo','sem','google ads','meta ads','google analytics','email marketing'] },
-  { t:'Growth / Performance Marketing', c:'marketing', title:['growth','performance marketing','paid media'], kw:['google ads','meta ads','tiktok ads','growth hacking','sem'] },
+  { t:'Growth / Performance Marketing', c:'marketing', title:['growth','performance marketing','paid media','paid media manager','media buyer','performance'], kw:['google ads','meta ads','tiktok ads','growth hacking','sem','roas','cac','conversiones'] },
   { t:'Community Manager', c:'marketing', title:['community manager','social media','redes sociales'], kw:['instagram','tiktok','canva','contenido','copywriting'] },
   { t:'Content / Copywriter', c:'marketing', title:['copywriter','content','redactor','creador de contenido'], kw:['copywriting','content marketing','seo','redaccion'] },
   { t:'SEO Specialist', c:'marketing', title:['seo specialist','especialista seo'], kw:['seo','sem','google analytics','posicionamiento web'] },
@@ -303,14 +321,14 @@ const ROLES = [
   { t:'Maestro / Albañil', c:'trades', title:['maestro','albanil','albanileria','maestro de la construccion'], kw:['construccion','obra gruesa','terminaciones'] },
   { t:'Operador de Maquinaria', c:'trades', title:['operador de maquinaria','operador','maquinaria pesada','operador de grua'], kw:['maquinaria pesada','excavadora','retroexcavadora','grua'] },
   // Inmobiliaria / Seguros / Minería / Energía
-  { t:'Corredor de Propiedades', c:'realestate', title:['corredor de propiedades','asesor inmobiliario','inmobiliaria','real estate'], kw:['inmobiliaria','bienes raices','arriendo','ventas'] },
-  { t:'Corredor de Seguros', c:'insurance', title:['corredor de seguros','ejecutivo de seguros','seguros'], kw:['seguros','polizas','siniestros','ventas'] },
+  { t:'Corredor de Propiedades', c:'realestate', title:['corredor de propiedades','asesor inmobiliario','real estate'], kw:['inmobiliaria','bienes raices','arriendo','ventas'] },
+  { t:'Corredor de Seguros', c:'insurance', title:['corredor de seguros','ejecutivo de seguros'], kw:['seguros','polizas','siniestros','ventas'] },
   { t:'Operador Minero', c:'mining', title:['operador mina','mineria','minero'], kw:['mineria','faena','turnos','maquinaria'] },
 ];
 
 // categorías -> etiqueta legible
 const CAT_LABEL = {
-  tech:'Tecnología / Desarrollo', web:'Desarrollo Web', data:'Datos / Analítica', cloud:'Cloud / DevOps',
+  exec:'Dirección / Gerencia', tech:'Tecnología / Desarrollo', web:'Desarrollo Web', data:'Datos / Analítica', cloud:'Cloud / DevOps',
   security:'Ciberseguridad', qa:'QA / Testing', design:'Diseño / UX', pm:'Producto / Proyectos',
   marketing:'Marketing / Growth', sales:'Ventas / Comercial', support:'Atención / Soporte',
   finance:'Finanzas / Contabilidad', hr:'Recursos Humanos', legal:'Legal', health:'Salud',
@@ -330,21 +348,31 @@ function detectSkills(text) {
   for (const row of SKILLS) {
     const display = row[0], cat = row[1];
     const aliases = row.slice(2).length ? row.slice(2) : [norm(display)];
-    for (const a of aliases) {
-      if (hasPhrase(hay, a)) { if (!seen.has(display)) { seen.add(display); out.push({ name: display, cat }); } break; }
-    }
+    let idx = -1;
+    for (const a of aliases) { const i = firstIndex(hay, a); if (i >= 0) { idx = i; break; } }
+    if (idx >= 0 && !seen.has(display)) { seen.add(display); out.push({ name: display, cat, idx }); }
   }
+  out.sort((a, b) => a.idx - b.idx);
   return out;
 }
 
 function scoreRoles(text) {
   const hay = ' ' + norm(text) + ' ';
+  const L = hay.length;
   const scored = [];
   for (const r of ROLES) {
-    let s = 0; const hits = [];
-    for (const ti of (r.title || [])) if (hasPhrase(hay, ti)) { s += 60; hits.push(ti); }
-    for (const k of (r.kw || [])) if (hasPhrase(hay, k)) { s += 12; hits.push(k); }
-    if (s > 0) scored.push({ t: r.t, c: r.c, score: s, hits: [...new Set(hits)] });
+    let titleScore = 0, kwScore = 0; const hits = [];
+    for (const ti of (r.title || [])) {
+      const idx = firstIndex(hay, ti);
+      if (idx >= 0) { const sc = 100 * recencyWeight(idx, L); if (sc > titleScore) titleScore = sc; hits.push(ti); }
+    }
+    for (const k of (r.kw || [])) {
+      const idx = firstIndex(hay, k);
+      if (idx >= 0) { const base = GENERIC_KW.has(norm(k)) ? 4 : 9; kwScore += base * recencyWeight(idx, L); hits.push(k); }
+    }
+    kwScore = Math.min(kwScore, 45);
+    const total = titleScore + kwScore;
+    if (total > 0) scored.push({ t: r.t, c: r.c, score: total, hasTitle: titleScore > 0, hits: [...new Set(hits)] });
   }
   scored.sort((a, b) => b.score - a.score);
   return scored;
@@ -361,9 +389,11 @@ function analyze(text) {
   let area = null, best = 0;
   for (const c in catScore) if (catScore[c] > best) { best = catScore[c]; area = c; }
 
-  // roles top con confianza; máximo por título único
-  const maxScore = scored.length ? scored[0].score : 0;
-  const roles = scored.slice(0, 12).map(r => ({
+  // filtrar ruido: dejar roles con título explícito o score decente
+  const filtered = scored.filter(r => r.hasTitle || r.score >= 28);
+  const use = filtered.length ? filtered : scored;
+  const maxScore = use.length ? use[0].score : 0;
+  const roles = use.slice(0, 10).map(r => ({
     title: r.t, cat: r.c,
     confidence: Math.max(20, Math.min(99, Math.round((r.score / (maxScore || 1)) * 90) + 9))
   }));

@@ -18,8 +18,8 @@
       return `<h1>Sube tu CV</h1><p class="sub">Tu CV muestra a los empleadores tus habilidades y experiencia, y muchas veces decide si avanzas.</p>
    <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
    <div class="segw"><div class="seg">
-     <button class="${!isLi ? 'on' : ''}" onclick="setSource('resume')">Subir CV</button>
-     <button class="${isLi ? 'on' : ''}" onclick="setSource('linkedin')">Traer de LinkedIn</button>
+     <button class="on" onclick="setSource('resume')">Subir CV</button>
+     <button disabled title="Disponible próximamente" style="opacity:.5;cursor:not-allowed">LinkedIn · Próximamente</button>
    </div></div>
    ${isLi
         ? `<div class="card"><label style="display:block;font-weight:600;font-size:13px;margin-bottom:6px">Pega tu URL de LinkedIn</label>
@@ -34,7 +34,7 @@
     },
     () => {
       const my = step;
-      setTimeout(() => { if (step === my) next(); }, 1500);
+      setTimeout(() => { if (step === my) next(); }, 6000);
       const sk = (S.cvSkills || []);
       const body = sk.length
         ? '<b>Detectamos ' + sk.length + ' habilidades' + (S.cvArea ? ' · Área: ' + S.cvArea : '') + ' en tu CV:</b><div class="chips" style="margin-top:8px">' + sk.slice(0, 14).map(s => '<span class="chip">' + s + '</span>').join('') + '</div><p class="hint" style="margin-top:10px">Las usaremos para priorizar tus mejores coincidencias.</p>'
