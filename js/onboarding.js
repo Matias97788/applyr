@@ -315,6 +315,7 @@
   function updateTitleSuggestions(query) {
     const box = document.getElementById('titleSuggestions');
     if (!box || !window.InstaWorkAITitles) return;
+    if (!(query || '').trim()) { box.classList.add('hidden'); box.innerHTML = ''; box._suggestList = []; return; }
     const list = window.InstaWorkAITitles.filterSuggestions(query, S.aiTitleSuggestions, S.titles);
     box._suggestList = list;
     if (!list.length) {

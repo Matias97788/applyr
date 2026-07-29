@@ -44,6 +44,17 @@ function recencyWeight(idx, L) {
   const p = L > 0 ? idx / L : 0;
   return p < 0.33 ? 1.6 : (p < 0.66 ? 1.0 : 0.5);
 }
+function originalSpelling(original, alias) {
+  try {
+    const esc = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('(^|[^a-zA-Z0-9])(' + esc + ')(?![a-zA-Z0-9])', 'i');
+    const m = re.exec(original || '');
+    return m ? m[2] : null;
+  } catch (e) { return null; }
+}
+function prettyAlias(a) {
+  return (a || '').replace(/\b([a-z])/g, (c) => c.toUpperCase());
+}
 const BROAD_SKILL = new Set(['Atención al Cliente','Ventas','Operaciones','Administración','Mantenimiento','Producción','Compras','Data Entry','Office','Inventario','Despacho','Bodega','Comunicaciones','Publicidad','Fotografía','Docencia','Turismo','Hotelería','Retail']);
 const GENERIC_KW = new Set(['ventas','atencion al cliente','servicio al cliente','operaciones','mantenimiento','administracion','office','excel','proyectos','equipo','kpi','presupuesto','agenda','reportes','b2b','b2c','crm','contenido']);
 
@@ -343,15 +354,20 @@ const CAT_LABEL = {
 
 // ---------- núcleo ----------
 function detectSkills(text) {
+  const original = (text || '').toString();
   const hay = ' ' + norm(text) + ' ';
   const out = [];
   const seen = new Set();
   for (const row of SKILLS) {
-    const display = row[0], cat = row[1];
-    const aliases = row.slice(2).length ? row.slice(2) : [norm(display)];
-    let idx = -1;
-    for (const a of aliases) { const i = firstIndex(hay, a); if (i >= 0) { idx = i; break; } }
-    if (idx >= 0 && !seen.has(display)) { seen.add(display); out.push({ name: display, cat, idx }); }
+    const canonical = row[0], cat = row[1];
+    const aliases = row.slice(2).length ? row.slice(2) : [norm(canonical)];
+    let idx = -1, matched = null;
+    for (const a of aliases) { const i = firstIndex(hay, a); if (i >= 0) { idx = i; matched = a; break; } }
+    if (idx >= 0 && !seen.has(canonical)) {
+      seen.add(canonical);
+      const label = originalSpelling(original, matched) || prettyAlias(matched);
+      out.push({ name: label, canonical, cat, idx });
+    }
   }
   out.sort((a, b) => a.idx - b.idx);
   return out;
@@ -401,7 +417,7 @@ function analyze(text) {
 
   // chips: ocultar términos genéricos y priorizar los de cargos recientes
   const L2 = norm(text).length + 2;
-  const cleaned = skills.filter(s => !BROAD_SKILL.has(s.name));
+  const cleaned = skills.filter(s => !BROAD_SKILL.has(s.canonical));
   const recent = cleaned.filter(s => (s.idx / (L2 || 1)) < 0.6);
   const displaySkills = (recent.length >= 6 ? recent : cleaned).slice(0, 12);
 
