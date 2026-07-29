@@ -6,7 +6,7 @@
   <title>instaWork — Auto Apply</title>
   <link rel="stylesheet" href="css/variables.css"/>
   <link rel="stylesheet" href="css/base.css"/>
-  <link rel="stylesheet" href="css/dashboard.css?v=2"/>
+  <link rel="stylesheet" href="css/dashboard.css?v=4"/>
 </head>
 <body class="dashboard auth-pending">
 <div class="app">
@@ -24,17 +24,20 @@
       </div>
       <div class="navgrp">Documentos</div>
       <div class="nav">
-        <a data-view="docs"><span class="dot">🗂</span> Application Kits</a>
-        <a data-view="docs"><span class="dot">📄</span> Currículums</a>
-        <a data-view="docs"><span class="dot">✍</span> Cartas</a>
+        <a data-view="jobhub"><span class="dot">🗂</span> Application Kits</a>
+        <a data-view="resumes"><span class="dot">📄</span> Currículums</a>
+        <a data-view="coverletters"><span class="dot">✍</span> Cartas</a>
       </div>
       <div class="navgrp">Entrevista</div>
       <div class="nav">
-        <a data-view="entrevista"><span class="dot">🎧</span> Interview Buddy</a>
-        <a data-view="entrevista"><span class="dot">🎤</span> Mock Interviews</a>
+        <a data-view="buddy"><span class="dot">🎧</span> Interview Buddy</a>
+        <a data-view="mock"><span class="dot">🎤</span> Mock Interviews</a>
+      </div>
+      <div class="navgrp">Cuenta</div>
+      <div class="nav">
+        <a data-view="settings"><span class="dot">⚙</span> Configuración</a>
       </div>
     </div>
-
     <div class="side-foot">
       <div class="user-menu-wrap">
         <button type="button" class="user-trigger" id="userMenuBtn" aria-expanded="false" aria-haspopup="true">
@@ -57,23 +60,22 @@
             </div>
           </div>
           <div class="user-dropdown-group">
-            <span class="user-dropdown-label">Cuenta</span>
             <button type="button" class="user-dropdown-item" data-view="cuenta" role="menuitem">
-              <span class="udi-icon udi-icon--purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M5 20c1.6-3.2 4.6-5 7-5s5.4 1.8 7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              <span class="udi-icon udi-icon--purple">👤</span>
               <span class="udi-copy"><strong>Mi perfil</strong><small>Datos y sesión</small></span>
             </button>
             <button type="button" class="user-dropdown-item" data-view="prefs" role="menuitem">
-              <span class="udi-icon udi-icon--blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              <span class="udi-icon udi-icon--blue">⚙</span>
               <span class="udi-copy"><strong>Preferencias</strong><small>Búsqueda y modo</small></span>
             </button>
             <a class="user-dropdown-item" href="onboarding.html" role="menuitem">
-              <span class="udi-icon udi-icon--green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="udi-icon udi-icon--green">✎</span>
               <span class="udi-copy"><strong>Editar perfil</strong><small>Asistente onboarding</small></span>
             </a>
           </div>
           <div class="user-dropdown-group user-dropdown-group--danger">
             <button type="button" class="user-dropdown-item danger" id="logoutBtn" role="menuitem">
-              <span class="udi-icon udi-icon--red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="udi-icon udi-icon--red">↪</span>
               <span class="udi-copy"><strong>Cerrar sesión</strong><small>Salir de instaWork</small></span>
             </button>
           </div>
@@ -82,129 +84,303 @@
     </div>
   </aside>
 
-  <main>
-    <div class="top">
-      <div style="display:flex;align-items:center;gap:12px">
-        <button class="hamb" id="hamb">☰</button>
-        <div>
-          <h1 id="viewTitle">Auto Apply</h1>
-          <p class="sub" id="viewSub">Postula a empleos que cumplen tus criterios · <b>mercado CL</b></p>
+  <div class="main-wrap">
+    <main>
+      <div class="top">
+        <div class="top-left">
+          <button class="hamb" id="hamb" type="button">☰</button>
+          <div>
+            <h1 id="viewTitle">Auto Apply</h1>
+            <p class="sub" id="viewSub">Postula automáticamente a empleos que coinciden contigo</p>
+          </div>
+        </div>
+        <div class="rightbar">
+          <div class="credits-pill">
+            <span class="credits-ic">💼</span>
+            <b id="credits">—</b>
+            <button type="button" class="btn sm primary" id="getCreditsBtn">Obtener más</button>
+          </div>
+          <div class="mode-wrap">
+            <button type="button" class="mode-btn" id="modeBtn">⚡ Auto mode</button>
+            <div class="mode-menu hidden" id="modeMenu">
+              <button type="button" data-mode="auto"><strong>Auto mode</strong><small>Totalmente automático. Máxima velocidad.</small></button>
+              <button type="button" data-mode="hybrid"><strong>Hybrid mode</strong><small>Auto-aplica si match ≥75%. Tú decides el resto.</small></button>
+              <button type="button" data-mode="review"><strong>Review mode</strong><small>Nada se envía sin tu aprobación.</small></button>
+            </div>
+          </div>
+          <button type="button" class="gift-btn" id="freeCreditsBtn" title="Créditos gratis">🎁</button>
+          <button type="button" class="user-chip" id="userChipBtn" aria-label="Menú cuenta">
+            <span class="user-avatar sm" id="userAvatarTop">U</span>
+          </button>
         </div>
       </div>
-      <div class="rightbar">
-        <span id="statePill" class="pill"><span class="g"></span> Inactivo</span>
-        <span>Tienes <b id="credits">—</b> créditos</span>
-        <select id="mode">
-          <option value="review">Review mode</option>
-          <option value="hybrid">Hybrid mode</option>
-          <option value="auto">Auto mode</option>
-        </select>
-        <button class="btn primary" id="searchBtn">Buscar y postular</button>
-        <button type="button" class="user-chip" id="userChipBtn" aria-label="Abrir menú de cuenta">
-          <span class="user-avatar sm" id="userAvatarTop">U</span>
-        </button>
-      </div>
-    </div>
 
-    <section id="v-dashboard">
-      <div class="kpis">
-        <div class="kpi"><div class="lbl">Estado</div><div class="val" id="stateVal" style="font-size:18px">Inactivo</div></div>
-        <div class="kpi"><div class="lbl">Postulaciones enviadas</div><div class="val" id="kApplied">0</div></div>
-        <div class="kpi"><div class="lbl">Empleos encontrados</div><div class="val" id="kFound">0</div></div>
-      </div>
-      <div class="tabs">
-        <button data-tab="jobs" class="active">Your Jobs</button>
-        <button data-tab="review">Quick Review</button>
-      </div>
-      <div id="tab-jobs">
-        <div style="display:flex;align-items:center;flex-wrap:wrap">
-          <div class="subtabs">
-            <button class="active" data-st="">Todos <span id="cAll">0</span></button>
-            <button data-st="ready">En cola</button>
-            <button data-st="applied">Postulados</button>
-            <button data-st="declined">Descartados</button>
+      <!-- DASHBOARD -->
+      <section id="v-dashboard">
+        <div class="dash-toolbar">
+          <div class="status-card" id="statusCard">
+            <div class="status-card-left">
+              <span class="status-dot" id="statusDot"></span>
+              <div>
+                <strong id="statusLabel">Pausado</strong>
+                <small id="statusHint">Pulsa Iniciar para seguir postulando</small>
+              </div>
+            </div>
+            <div class="status-card-actions">
+              <button type="button" class="play-btn" id="queueToggle" aria-label="Iniciar o pausar">▶</button>
+              <button type="button" class="icon-btn" data-view-jump="prefs" title="Preferencias">⚙</button>
+            </div>
           </div>
-          <div class="toolbar">
-            <input type="search" id="q" placeholder="Buscar empleos o empresas…"/>
-            <select id="sort">
-              <option value="fit_score">Fit score</option>
-              <option value="published_at">Más recientes</option>
+          <div class="stat-cards">
+            <div class="stat-card"><span>Enviadas</span><b id="kApplied">0</b></div>
+            <div class="stat-card"><span>Encontradas</span><b id="kFound">0</b></div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button type="button" data-tab="review">🏷 Quick Review</button>
+          <button type="button" data-tab="jobs" class="active">✓ Your Jobs</button>
+        </div>
+
+        <div id="tab-review" class="hidden">
+          <div class="qr-working hidden" id="qrWorking">
+            <div class="qr-working-icon">⚡</div>
+            <h2>El modo automático trabaja en segundo plano</h2>
+            <p>Estamos encontrando roles, preparando postulaciones y enviándolas automáticamente.</p>
+            <button type="button" class="btn ghost" id="viewAllJobsBtn">Ver todos los empleos</button>
+          </div>
+          <div class="qr" id="qr"></div>
+        </div>
+
+        <div id="tab-jobs">
+          <div class="jobs-bar">
+            <div class="subtabs">
+              <button type="button" class="active" data-st="">Todos <span id="cAll">0</span></button>
+              <button type="button" data-st="ready">Por revisar <span id="cReview">0</span></button>
+              <button type="button" data-st="applied">Postulados <span id="cApplied">0</span></button>
+              <button type="button" data-st="declined">Descartados <span id="cDeclined">0</span></button>
+            </div>
+            <div class="toolbar">
+              <input type="search" id="q" placeholder="Buscar empleos o empresas…"/>
+              <select id="sort">
+                <option value="fit_score">Fit score</option>
+                <option value="published_at">Más recientes</option>
+              </select>
+              <button type="button" class="btn ghost sm" id="refreshJobsBtn">↻ Actualizar</button>
+              <button type="button" class="btn primary sm" id="searchBtn">Buscar empleos</button>
+            </div>
+          </div>
+          <div class="job-list" id="jobList"></div>
+          <div class="pager hidden" id="jobsPager"></div>
+        </div>
+      </section>
+
+      <!-- INBOX -->
+      <section id="v-inbox" class="hidden">
+        <div class="inbox-head">
+          <div>
+            <h2 class="section-h">Inbox</h2>
+            <p class="sub" id="proxyEmailLine">—</p>
+          </div>
+          <div class="inbox-filters">
+            <label class="chk"><input type="checkbox" id="inboxUnreadOnly"/> Solo no leídos</label>
+            <select id="inboxLabelFilter">
+              <option value="">Todas las etiquetas</option>
+              <option value="Confirmación">Confirmación</option>
+              <option value="Assessment">Assessment</option>
+              <option value="No esta vez">No esta vez</option>
             </select>
           </div>
         </div>
-        <div class="card">
-          <table>
-            <thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead>
-            <tbody id="rows"><tr><td colspan="4" class="empty">Pulsa <b>Buscar y postular</b> para llenar tu cola con empleos frescos.</td></tr></tbody>
-          </table>
-          <div class="pager hidden" id="jobsPager" aria-label="Paginación de empleos"></div>
+        <div class="inbox-list" id="inboxList"></div>
+      </section>
+
+      <!-- BUSCAR -->
+      <section id="v-buscar" class="hidden">
+        <div class="card pad-card">
+          <h3 class="section-h">Buscar empleos</h3>
+          <p class="sub">Bolsa interna con scraper de +1M empleos/mes. Auto Apply busca un rango mucho más amplio.</p>
+          <div class="search-row">
+            <input type="text" id="bq" class="inline" placeholder="Rol o palabra clave"/>
+            <input type="text" id="bcountry" class="inline" placeholder="País" value="Chile" style="width:120px"/>
+            <button type="button" class="btn primary" id="bsearch">Buscar</button>
+          </div>
+          <div class="filter-chips">
+            <button type="button" class="chip-filter active" data-wm="all">Todos</button>
+            <button type="button" class="chip-filter" data-wm="remote">Remoto</button>
+            <button type="button" class="chip-filter" data-wm="onsite">Presencial / Híbrido</button>
+          </div>
         </div>
-      </div>
-      <div id="tab-review" class="hidden"><div class="qr" id="qr"></div></div>
-    </section>
+        <div class="job-list" id="browsList" style="margin-top:14px"></div>
+      </section>
 
-    <section id="v-buscar" class="hidden">
-      <div class="card pad-card">
-        <h3 style="margin:0 0 10px">Buscar empleos</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="text" id="bq" class="inline" placeholder="Rol o palabra clave (ej: Developer, Diseñador)" style="flex:1;min-width:220px"/>
-          <input type="text" id="bcountry" class="inline" placeholder="País" value="Chile" style="width:120px"/>
-          <button class="btn primary" id="bsearch">Buscar</button>
+      <!-- GUARDADOS -->
+      <section id="v-guardados" class="hidden">
+        <div class="empty-state" id="savedEmpty">
+          <h3>Sin empleos guardados</h3>
+          <p>Ve a Buscar empleos para explorar y guardar ofertas.</p>
+          <button type="button" class="btn primary" data-view-jump="buscar">Buscar empleos</button>
         </div>
-        <p class="sub" style="margin-top:10px">Busca en la bolsa agregada (GetOnBoard CL, RemoteOK, Greenhouse, Ashby, Lever) con la regla de oro: solo empleos ≤ 21 días.</p>
-      </div>
-      <div class="card" style="margin-top:14px">
-        <table>
-          <thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead>
-          <tbody id="brows"><tr><td colspan="4" class="empty">Escribe un rol y pulsa Buscar.</td></tr></tbody>
-        </table>
-      </div>
-    </section>
+        <div class="job-list hidden" id="savedList"></div>
+      </section>
 
-    <section id="v-guardados" class="hidden">
-      <div class="card" style="margin-top:14px">
-        <table>
-          <thead><tr><th>Empresa</th><th>Empleo</th><th>Publicado</th><th>Acción</th></tr></thead>
-          <tbody id="srows"><tr><td colspan="4" class="empty">Aún no guardas empleos. Usa ★ en Quick Review o en la tabla.</td></tr></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="v-answers" class="hidden">
-      <div class="card pad-card">
-        <h3 style="margin:0 0 6px">Answer Library</h3>
-        <p class="sub">Responde una vez las preguntas comunes y las reutilizamos en tus postulaciones.</p>
-        <div id="qalist"></div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <input type="text" id="qaq" class="inline" placeholder="Pregunta" style="flex:1"/>
-          <input type="text" id="qaa" class="inline" placeholder="Respuesta" style="flex:1"/>
-          <button class="btn primary" id="qaadd">Agregar</button>
+      <!-- ANSWER LIBRARY -->
+      <section id="v-answers" class="hidden">
+        <div class="pref-tabs">
+          <button type="button" class="pref-tab active" data-ptab="quick">Ajustes rápidos</button>
+          <button type="button" class="pref-tab" data-ptab="answers">Answer Library <span class="badge-sm" id="pendingAnswersBadge">0</span></button>
+          <button type="button" class="pref-tab" data-ptab="reject">Motivos de rechazo</button>
         </div>
-      </div>
-    </section>
+        <div id="ptab-quick" class="card pad-card">
+          <div class="alert-banner hidden" id="answersAlert">
+            <span id="answersAlertText"></span>
+            <button type="button" class="linkbtn" data-ptab-jump="answers">Abrir Answer Library</button>
+          </div>
+          <h3>Modo de aplicación</h3>
+          <div class="mode-cards" id="modeCards"></div>
+          <h3 style="margin-top:20px">Roles objetivo</h3>
+          <div id="prefTitles" class="title-chips-readonly"></div>
+        </div>
+        <div id="ptab-answers" class="card pad-card hidden">
+          <p class="sub">Guarda respuestas una vez y reutilízalas en todas tus postulaciones.</p>
+          <div id="qalist"></div>
+          <div id="commonQaList"></div>
+          <div class="qa-add-row">
+            <input type="text" id="qaq" class="inline" placeholder="Pregunta"/>
+            <input type="text" id="qaa" class="inline" placeholder="Respuesta"/>
+            <button type="button" class="btn primary" id="qaadd">Agregar</button>
+          </div>
+        </div>
+        <div id="ptab-reject" class="card pad-card hidden">
+          <p class="sub">Auto Apply aprende de empleos que rechazas. Futuros matches similares tendrán menor score.</p>
+          <div id="rejectList"></div>
+          <div class="qa-add-row">
+            <input type="text" id="rejectInput" class="inline" placeholder="Ej: empresa, palabra en título…"/>
+            <button type="button" class="btn primary" id="rejectAdd">Agregar filtro</button>
+          </div>
+        </div>
+      </section>
 
-    <section id="v-prefs" class="hidden">
-      <div class="account-shell">
+      <!-- PREFERENCIAS -->
+      <section id="v-prefs" class="hidden">
         <div class="account-hero account-hero--prefs">
-          <div>
-            <span class="account-hero-tag">Configuración</span>
-            <h2>Preferencias de búsqueda</h2>
-            <p>Roles, país y modo con el que postulamos por ti.</p>
-          </div>
+          <span class="account-hero-tag">Configuración</span>
+          <h2>Preferencias de búsqueda</h2>
+          <p>Roles, ubicación, compensación y comportamiento de Auto Apply.</p>
         </div>
-        <div class="card account-card">
+        <div class="card account-card pad-card">
           <div id="prefbody" class="pref-grid"></div>
+          <label class="field-block">Límite diario de postulaciones
+            <input type="number" id="dailyLimit" min="1" max="50" value="10"/>
+          </label>
           <div class="account-actions">
-            <button class="btn ghost" type="button" onclick="window.location.href='onboarding.html'">
-              <span class="btn-ic">✎</span> Editar en el asistente
-            </button>
+            <button type="button" class="btn primary" id="savePrefsBtn">Guardar ajustes</button>
+            <button type="button" class="btn ghost" onclick="location.href='onboarding.html'">Editar en onboarding</button>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="v-cuenta" class="hidden">
-      <div class="account-shell">
+      <!-- JOB HUB -->
+      <section id="v-jobhub" class="hidden">
+        <div class="section-head">
+          <div>
+            <h2 class="section-h">Job Hub</h2>
+            <p class="sub">Gestiona tus Application Kits y sigue el pipeline de postulaciones.</p>
+          </div>
+          <div class="head-actions">
+            <button type="button" class="btn ghost sm view-toggle active" data-kview="list">Lista</button>
+            <button type="button" class="btn ghost sm view-toggle" data-kview="kanban">Kanban</button>
+            <button type="button" class="btn primary sm" id="newKitBtn">+ Nuevo kit</button>
+          </div>
+        </div>
+        <input type="search" id="kitSearch" class="inline" placeholder="Buscar por título o empresa…" style="width:100%;margin-bottom:14px"/>
+        <div id="kitListView" class="kit-list"></div>
+        <div id="kitKanbanView" class="kanban hidden"></div>
+      </section>
+
+      <!-- RESUMES -->
+      <section id="v-resumes" class="hidden">
+        <div class="section-head">
+          <div>
+            <h2 class="section-h">Mis currículums</h2>
+            <p class="sub">Crea, edita y elige qué CV usar en tus postulaciones.</p>
+          </div>
+          <button type="button" class="btn primary sm" id="newResumeBtn">+ Nuevo CV</button>
+        </div>
+        <div class="resume-grid" id="resumeGrid"></div>
+        <div class="upsell-card">
+          <strong>Auto-personaliza tu CV para más entrevistas</strong>
+          <p>Aumenta tus chances de entrevista un 44%</p>
+          <button type="button" class="btn ghost sm">Saber más</button>
+        </div>
+      </section>
+
+      <!-- COVER LETTERS -->
+      <section id="v-coverletters" class="hidden">
+        <div class="section-head">
+          <div>
+            <h2 class="section-h">Mis cartas de presentación</h2>
+            <p class="sub">Genera cartas con IA y reutilízalas en tus postulaciones.</p>
+          </div>
+          <button type="button" class="btn primary sm" id="newCoverBtn">+ Nueva carta</button>
+        </div>
+        <div id="coverList" class="doc-list"></div>
+      </section>
+
+      <!-- INTERVIEW BUDDY -->
+      <section id="v-buddy" class="hidden">
+        <div class="buddy-hero card pad-card">
+          <h2 class="section-h">Interview Buddy (Desktop)</h2>
+          <p class="sub">Asistencia en tiempo real durante entrevistas. Invisible en screen share. Escucha al entrevistador en vivo.</p>
+          <p class="sub"><b>Disponible en Windows y macOS</b></p>
+          <button type="button" class="btn primary" id="unlockBuddyBtn">Desbloquear acceso</button>
+        </div>
+      </section>
+
+      <!-- MOCK INTERVIEWS -->
+      <section id="v-mock" class="hidden">
+        <div class="section-head">
+          <div>
+            <h2 class="section-h">Mock Interviews</h2>
+            <p class="sub">Practica entrevistas simuladas por rol.</p>
+          </div>
+          <button type="button" class="btn primary sm" id="newMockBtn">+ Nueva entrevista</button>
+        </div>
+        <div id="mockList" class="doc-list"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="v-settings" class="hidden">
+        <h2 class="section-h">Configuración de cuenta</h2>
+        <div class="settings-tabs">
+          <button type="button" class="settings-tab active" data-stab="prefs">Preferencias</button>
+          <button type="button" class="settings-tab" data-stab="personal">Datos personales</button>
+          <button type="button" class="settings-tab" data-stab="notif">Notificaciones</button>
+          <button type="button" class="settings-tab" data-stab="billing">Facturación</button>
+          <button type="button" class="settings-tab danger-tab" data-stab="logout" id="settingsLogout">Cerrar sesión</button>
+        </div>
+        <div class="card pad-card" id="stab-prefs">
+          <label>Idioma <select id="setLang"><option value="es">Español</option><option value="en">English</option></select></label>
+          <label>Email de postulaciones <input type="text" id="setProxyEmail" readonly class="inline"/></label>
+          <label class="chk"><input type="checkbox" id="setMarketing" checked/> Cookies de marketing</label>
+          <button type="button" class="btn primary sm" id="saveSettingsBtn">Guardar</button>
+        </div>
+        <div class="card pad-card hidden" id="stab-personal"><div id="settingsPersonal" class="pref-grid"></div></div>
+        <div class="card pad-card hidden" id="stab-notif">
+          <div id="notifList" class="notif-list"></div>
+        </div>
+        <div class="card pad-card hidden" id="stab-billing">
+          <h3>Auto-Apply</h3>
+          <div class="billing-plan">
+            <div><span class="plan-badge">mensual</span><p>Plan de prueba · 72 créditos incluidos</p></div>
+            <div class="plan-price"><b>$0</b><small>/ mes</small></div>
+          </div>
+          <button type="button" class="btn primary sm" id="upgradePlanBtn">Mejorar plan — $49/mes</button>
+        </div>
+      </section>
+
+      <!-- CUENTA -->
+      <section id="v-cuenta" class="hidden">
         <div class="account-hero">
           <div class="account-hero-user">
             <span class="user-avatar xl" id="userAvatarLarge">U</span>
@@ -215,48 +391,68 @@
             </div>
           </div>
         </div>
-        <div class="card account-card">
-          <h3 class="account-section-title">Información de la cuenta</h3>
+        <div class="card account-card pad-card">
           <div id="accountBody" class="pref-grid"></div>
           <div class="account-actions">
-            <button class="btn ghost" type="button" data-view-jump="prefs">
-              <span class="btn-ic">⚙</span> Preferencias
-            </button>
-            <button class="btn ghost" type="button" onclick="window.location.href='onboarding.html'">
-              <span class="btn-ic">✎</span> Editar perfil
-            </button>
-            <button class="btn danger outline" type="button" id="logoutBtnMain">
-              <span class="btn-ic">↪</span> Cerrar sesión
-            </button>
+            <button type="button" class="btn ghost" data-view-jump="prefs">Preferencias</button>
+            <button type="button" class="btn danger outline" id="logoutBtnMain">Cerrar sesión</button>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
-    <section id="v-inbox" class="hidden">
-      <div class="card pad-card">
-        <h3 style="margin:0 0 6px">Inbox dedicado</h3>
-        <p class="sub">Buzón propio del servicio (IMAP) que clasifica respuestas de reclutadores. <b>Disponible en la Fase 2</b> (requiere infraestructura de correo).</p>
+    <!-- AI AGENT PANEL -->
+    <aside class="agent-panel" id="agentPanel">
+      <button type="button" class="agent-toggle" id="agentToggle" aria-label="Abrir agente">🤖</button>
+      <div class="agent-inner hidden" id="agentInner">
+        <div class="agent-head">
+          <strong>instaWork Agent</strong>
+          <button type="button" class="icon-btn" id="agentClose">✕</button>
+        </div>
+        <div class="agent-messages" id="agentMessages"></div>
+        <div class="agent-actions">
+          <button type="button" class="btn primary sm" id="agentResumeBtn">Reanudar postulaciones</button>
+          <button type="button" class="btn ghost sm" data-view-jump="prefs">Ver preferencias</button>
+        </div>
+        <div class="agent-input">
+          <input type="text" id="agentInput" placeholder="Escribe al agente…"/>
+          <button type="button" class="btn primary sm" id="agentSend" disabled>Enviar</button>
+        </div>
       </div>
-    </section>
-    <section id="v-docs" class="hidden">
-      <div class="card pad-card">
-        <h3 style="margin:0 0 6px">Documentos</h3>
-        <p class="sub">Constructor de CV, cartas y kits por empleo (con IA). <b>Disponible en la Fase 2.</b></p>
-      </div>
-    </section>
-    <section id="v-entrevista" class="hidden">
-      <div class="card pad-card">
-        <h3 style="margin:0 0 6px">Entrevista</h3>
-        <p class="sub">Interview Buddy y Mock Interviews con IA. <b>Disponible en la Fase 2.</b></p>
-      </div>
-    </section>
-  </main>
+    </aside>
+  </div>
 </div>
 
-<script src="js/engine.js"></script>
+<!-- JOB DETAIL DRAWER -->
+<div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+<aside class="job-drawer hidden" id="jobDrawer" aria-hidden="true">
+  <div class="drawer-head">
+    <button type="button" class="icon-btn" id="drawerClose">✕</button>
+    <h2 id="drawerTitle">—</h2>
+    <p id="drawerMeta">—</p>
+  </div>
+  <div class="drawer-tabs">
+    <button type="button" class="active" data-dtab="overview">Resumen</button>
+    <button type="button" data-dtab="application">Postulación</button>
+    <button type="button" data-dtab="fit">Job Fit</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<!-- NOTIFICATIONS DROPDOWN -->
+<div class="notif-dropdown hidden" id="notifDropdown"></div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav">
+  <button type="button" data-view="dashboard" class="active"><span>🤖</span>Dashboard</button>
+  <button type="button" data-view="inbox"><span>✉</span>Inbox <em id="bnInbox">0</em></button>
+  <button type="button" id="notifBtn"><span>🔔</span>Alertas <em id="bnNotif">0</em></button>
+  <button type="button" id="moreNavBtn"><span>⋯</span>Más</button>
+</nav>
+
+<script src="js/engine.js?v=2"></script>
 <script type="module" src="js/auth-guard.js"></script>
 <script type="module" src="js/dashboard-user.js"></script>
-<script src="js/dashboard.js"></script>
+<script src="js/dashboard.js?v=2"></script>
 </body>
 </html>

@@ -84,7 +84,7 @@ function bindUserMenu() {
     });
   });
 
-  document.querySelectorAll('#logoutBtn, #logoutBtnMain').forEach((btn) => {
+  document.querySelectorAll('#logoutBtn, #logoutBtnMain, #settingsLogout').forEach((btn) => {
     btn?.addEventListener('click', () => signOutUser());
   });
 
