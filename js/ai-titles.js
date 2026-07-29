@@ -44,6 +44,7 @@ function recencyWeight(idx, L) {
   const p = L > 0 ? idx / L : 0;
   return p < 0.33 ? 1.6 : (p < 0.66 ? 1.0 : 0.5);
 }
+const BROAD_SKILL = new Set(['Atención al Cliente','Ventas','Operaciones','Administración','Mantenimiento','Producción','Compras','Data Entry','Office','Inventario','Despacho','Bodega','Comunicaciones','Publicidad','Fotografía','Docencia','Turismo','Hotelería','Retail']);
 const GENERIC_KW = new Set(['ventas','atencion al cliente','servicio al cliente','operaciones','mantenimiento','administracion','office','excel','proyectos','equipo','kpi','presupuesto','agenda','reportes','b2b','b2c','crm','contenido']);
 
 // ---------- TAXONOMÍA DE HABILIDADES ----------
@@ -398,8 +399,14 @@ function analyze(text) {
     confidence: Math.max(20, Math.min(99, Math.round((r.score / (maxScore || 1)) * 90) + 9))
   }));
 
+  // chips: ocultar términos genéricos y priorizar los de cargos recientes
+  const L2 = norm(text).length + 2;
+  const cleaned = skills.filter(s => !BROAD_SKILL.has(s.name));
+  const recent = cleaned.filter(s => (s.idx / (L2 || 1)) < 0.6);
+  const displaySkills = (recent.length >= 6 ? recent : cleaned).slice(0, 12);
+
   return {
-    skills: skills.map(s => s.name),
+    skills: displaySkills.map(s => s.name),
     skillsDetailed: skills,
     roles,                          // [{title, cat, confidence}]
     titles: roles.map(r => r.title),
