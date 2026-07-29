@@ -37,7 +37,7 @@
       setTimeout(() => { if (step === my) next(); }, 1500);
       const sk = (S.cvSkills || []);
       const body = sk.length
-        ? '<b>Detectamos ' + sk.length + ' habilidades en tu CV:</b><div class="chips" style="margin-top:8px">' + sk.slice(0, 14).map(s => '<span class="chip">' + s + '</span>').join('') + '</div><p class="hint" style="margin-top:10px">Las usaremos para priorizar tus mejores coincidencias.</p>'
+        ? '<b>Detectamos ' + sk.length + ' habilidades' + (S.cvArea ? ' · Área: ' + S.cvArea : '') + ' en tu CV:</b><div class="chips" style="margin-top:8px">' + sk.slice(0, 14).map(s => '<span class="chip">' + s + '</span>').join('') + '</div><p class="hint" style="margin-top:10px">Las usaremos para priorizar tus mejores coincidencias.</p>'
         : (S.cv ? '<b>CV recibido.</b><p class="hint" style="margin-top:6px">No pudimos extraer habilidades automáticamente (puede ser un PDF escaneado como imagen). Igual lo guardamos.</p>' : '<b>Sin CV.</b><p class="hint">Puedes subirlo luego desde Preferencias.</p>');
       return `<h1>Leyendo tu CV</h1><p class="sub">Extraemos la información clave de tu CV para priorizar tus postulaciones.</p>
    <div class="spin"></div><div class="card">${body}${S.cvChars ? ('<p class="hint" style="margin-top:8px">~' + S.cvChars + ' caracteres leídos.</p>') : ''}</div>`;
@@ -167,20 +167,19 @@
   window.setSource = function (s) { S.source = s; render(); };
 
   function inferTitles(skills) {
+    try {
+      if (window.InstaWorkAnalyzer) {
+        const t = window.InstaWorkAnalyzer.inferTitles(skills || [], S.cvText || '');
+        if (t && t.length) return t.slice(0, 6);
+      }
+    } catch (e) {}
     const s = (skills || []).map(x => x.toLowerCase());
     const has = (...k) => k.some(x => s.includes(x));
     const t = [];
     if (has('react', 'vue', 'angular', 'javascript', 'typescript')) t.push('Frontend Developer');
-    if (has('node', 'node.js', 'python', 'django', 'flask', 'java', 'php', 'laravel', 'go', 'golang', '.net', 'c#')) t.push('Backend Developer');
-    if (has('react', 'node', 'javascript', 'typescript') && has('python', 'java', 'php', 'node')) t.push('Full-Stack Developer');
-    if (has('figma', 'ux', 'ui')) t.push('Diseñador UX/UI');
-    if (has('wordpress', 'shopify', 'woocommerce')) t.push('Desarrollador Web');
-    if (has('seo', 'sem', 'google ads', 'meta ads', 'marketing', 'google analytics')) t.push('Marketing Digital');
-    if (has('excel', 'power bi', 'tableau', 'sql')) t.push('Analista de Datos');
-    if (has('scrum', 'agile', 'jira', 'notion')) t.push('Project Manager');
-    if (has('salesforce', 'hubspot', 'ventas')) t.push('Ejecutivo Comercial');
-    if (!t.length) t.push('Developer', 'Ingeniero de Software');
-    return [...new Set(t)].slice(0, 5);
+    if (has('node', 'python', 'java', 'php')) t.push('Backend Developer');
+    if (!t.length) t.push('Profesional', 'Analista', 'Asistente');
+    return [...new Set(t)].slice(0, 6);
   }
 
   window.saveTitles = function () {
@@ -450,6 +449,9 @@
   const SKILL_DICT = ['javascript', 'typescript', 'react', 'vue', 'angular', 'node.js', 'node', 'python', 'java', 'php', 'laravel', 'wordpress', 'shopify', 'woocommerce', 'sql', 'postgresql', 'mysql', 'mongodb', 'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'git', 'html', 'css', 'tailwind', 'bootstrap', 'django', 'flask', 'fastapi', 'spring', '.net', 'c#', 'c++', 'golang', 'go', 'rust', 'kotlin', 'swift', 'flutter', 'react native', 'figma', 'ux', 'ui', 'seo', 'sem', 'google analytics', 'google ads', 'meta ads', 'excel', 'power bi', 'tableau', 'scrum', 'agile', 'jira', 'notion', 'marketing', 'ventas', 'contabilidad', 'photoshop', 'illustrator', 'autocad', 'salesforce', 'hubspot'];
 
   function extractSkills(t) {
+    try {
+      if (window.InstaWorkAnalyzer) return window.InstaWorkAnalyzer.detectSkills(t).map(x => x.name);
+    } catch (e) {}
     const low = (t || '').toLowerCase();
     const out = [];
     SKILL_DICT.forEach(s => { if (low.includes(s) && !out.includes(s)) out.push(s); });
@@ -478,7 +480,15 @@
       }
     } catch (e) { text = ''; }
     const skills = extractSkills(text);
-    S.cvText = (text || '').slice(0, 5000);
+    S.cvText = (text || '').slice(0, 8000);
+    try {
+      if (window.InstaWorkAnalyzer) {
+        const a = window.InstaWorkAnalyzer.analyze(text || '');
+        S.cvArea = a.areaLabel || null;
+        S.cvRoles = a.titles || [];
+        if ((!S.titles || !S.titles.length) && a.titles && a.titles.length) S.titles = a.titles.slice(0, 4);
+      }
+    } catch (e) {}
     S.cvSkills = skills;
     S.cvChars = (text || '').length;
     S.cvMsg = 'Leído ✓';
