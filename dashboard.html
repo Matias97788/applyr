@@ -6,31 +6,79 @@
   <title>instaWork — Auto Apply</title>
   <link rel="stylesheet" href="css/variables.css"/>
   <link rel="stylesheet" href="css/base.css"/>
-  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/dashboard.css?v=2"/>
 </head>
 <body class="dashboard auth-pending">
 <div class="app">
   <aside id="side">
-    <div class="logo">insta<span>Work</span></div>
-    <div class="navgrp">Auto Apply</div>
-    <div class="nav">
-      <a data-view="dashboard" class="active"><span class="dot">▦</span> Dashboard</a>
-      <a data-view="inbox"><span class="dot">✉</span> Inbox <span class="badge" id="nInbox">0</span></a>
-      <a data-view="buscar"><span class="dot">🔍</span> Buscar empleos</a>
-      <a data-view="guardados"><span class="dot">★</span> Guardados <span class="badge" id="nSaved">0</span></a>
-      <a data-view="answers"><span class="dot">≣</span> Answer Library</a>
-      <a data-view="prefs"><span class="dot">⚙</span> Preferencias</a>
+    <div class="side-scroll">
+      <div class="logo">insta<span>Work</span></div>
+      <div class="navgrp">Auto Apply</div>
+      <div class="nav">
+        <a data-view="dashboard" class="active"><span class="dot">▦</span> Dashboard</a>
+        <a data-view="inbox"><span class="dot">✉</span> Inbox <span class="badge" id="nInbox">0</span></a>
+        <a data-view="buscar"><span class="dot">🔍</span> Buscar empleos</a>
+        <a data-view="guardados"><span class="dot">★</span> Guardados <span class="badge" id="nSaved">0</span></a>
+        <a data-view="answers"><span class="dot">≣</span> Answer Library</a>
+        <a data-view="prefs"><span class="dot">⚙</span> Preferencias</a>
+      </div>
+      <div class="navgrp">Documentos</div>
+      <div class="nav">
+        <a data-view="docs"><span class="dot">🗂</span> Application Kits</a>
+        <a data-view="docs"><span class="dot">📄</span> Currículums</a>
+        <a data-view="docs"><span class="dot">✍</span> Cartas</a>
+      </div>
+      <div class="navgrp">Entrevista</div>
+      <div class="nav">
+        <a data-view="entrevista"><span class="dot">🎧</span> Interview Buddy</a>
+        <a data-view="entrevista"><span class="dot">🎤</span> Mock Interviews</a>
+      </div>
     </div>
-    <div class="navgrp">Documentos</div>
-    <div class="nav">
-      <a data-view="docs"><span class="dot">🗂</span> Application Kits</a>
-      <a data-view="docs"><span class="dot">📄</span> Currículums</a>
-      <a data-view="docs"><span class="dot">✍</span> Cartas</a>
-    </div>
-    <div class="navgrp">Entrevista</div>
-    <div class="nav">
-      <a data-view="entrevista"><span class="dot">🎧</span> Interview Buddy</a>
-      <a data-view="entrevista"><span class="dot">🎤</span> Mock Interviews</a>
+
+    <div class="side-foot">
+      <div class="user-menu-wrap">
+        <button type="button" class="user-trigger" id="userMenuBtn" aria-expanded="false" aria-haspopup="true">
+          <span class="user-avatar" id="userAvatar">U</span>
+          <span class="user-meta">
+            <strong id="userName">Mi cuenta</strong>
+            <small id="userEmail">—</small>
+          </span>
+          <span class="user-chevron" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </button>
+        <div class="user-dropdown hidden" id="userDropdown" role="menu">
+          <div class="user-dropdown-hero">
+            <span class="user-avatar md" id="userAvatarMenu">U</span>
+            <div class="user-dropdown-head">
+              <strong data-user-name>Mi cuenta</strong>
+              <small data-user-email>—</small>
+              <span class="user-provider-badge" id="userProviderBadge">Cuenta</span>
+            </div>
+          </div>
+          <div class="user-dropdown-group">
+            <span class="user-dropdown-label">Cuenta</span>
+            <button type="button" class="user-dropdown-item" data-view="cuenta" role="menuitem">
+              <span class="udi-icon udi-icon--purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M5 20c1.6-3.2 4.6-5 7-5s5.4 1.8 7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              <span class="udi-copy"><strong>Mi perfil</strong><small>Datos y sesión</small></span>
+            </button>
+            <button type="button" class="user-dropdown-item" data-view="prefs" role="menuitem">
+              <span class="udi-icon udi-icon--blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              <span class="udi-copy"><strong>Preferencias</strong><small>Búsqueda y modo</small></span>
+            </button>
+            <a class="user-dropdown-item" href="onboarding.html" role="menuitem">
+              <span class="udi-icon udi-icon--green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="udi-copy"><strong>Editar perfil</strong><small>Asistente onboarding</small></span>
+            </a>
+          </div>
+          <div class="user-dropdown-group user-dropdown-group--danger">
+            <button type="button" class="user-dropdown-item danger" id="logoutBtn" role="menuitem">
+              <span class="udi-icon udi-icon--red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="udi-copy"><strong>Cerrar sesión</strong><small>Salir de instaWork</small></span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </aside>
 
@@ -52,6 +100,9 @@
           <option value="auto">Auto mode</option>
         </select>
         <button class="btn primary" id="searchBtn">Buscar y postular</button>
+        <button type="button" class="user-chip" id="userChipBtn" aria-label="Abrir menú de cuenta">
+          <span class="user-avatar sm" id="userAvatarTop">U</span>
+        </button>
       </div>
     </div>
 
@@ -133,10 +184,52 @@
     </section>
 
     <section id="v-prefs" class="hidden">
-      <div class="card pad-card">
-        <h3 style="margin:0 0 8px">Preferencias</h3>
-        <div id="prefbody" class="sub"></div>
-        <button class="btn primary" style="margin-top:12px" onclick="window.location.href='onboarding.html'">Editar en el asistente →</button>
+      <div class="account-shell">
+        <div class="account-hero account-hero--prefs">
+          <div>
+            <span class="account-hero-tag">Configuración</span>
+            <h2>Preferencias de búsqueda</h2>
+            <p>Roles, país y modo con el que postulamos por ti.</p>
+          </div>
+        </div>
+        <div class="card account-card">
+          <div id="prefbody" class="pref-grid"></div>
+          <div class="account-actions">
+            <button class="btn ghost" type="button" onclick="window.location.href='onboarding.html'">
+              <span class="btn-ic">✎</span> Editar en el asistente
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="v-cuenta" class="hidden">
+      <div class="account-shell">
+        <div class="account-hero">
+          <div class="account-hero-user">
+            <span class="user-avatar xl" id="userAvatarLarge">U</span>
+            <div>
+              <span class="account-hero-tag" id="accountProvider">Cuenta</span>
+              <h2 id="accountName">Mi cuenta</h2>
+              <p id="accountEmail">—</p>
+            </div>
+          </div>
+        </div>
+        <div class="card account-card">
+          <h3 class="account-section-title">Información de la cuenta</h3>
+          <div id="accountBody" class="pref-grid"></div>
+          <div class="account-actions">
+            <button class="btn ghost" type="button" data-view-jump="prefs">
+              <span class="btn-ic">⚙</span> Preferencias
+            </button>
+            <button class="btn ghost" type="button" onclick="window.location.href='onboarding.html'">
+              <span class="btn-ic">✎</span> Editar perfil
+            </button>
+            <button class="btn danger outline" type="button" id="logoutBtnMain">
+              <span class="btn-ic">↪</span> Cerrar sesión
+            </button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -163,6 +256,7 @@
 
 <script src="js/engine.js"></script>
 <script type="module" src="js/auth-guard.js"></script>
+<script type="module" src="js/dashboard-user.js"></script>
 <script src="js/dashboard.js"></script>
 </body>
 </html>

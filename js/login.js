@@ -1,24 +1,22 @@
 import { auth } from './firebase.js';
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-  getAdditionalUserInfo
+  fetchSignInMethodsForEmail
 } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
 import {
   enterApp,
   firebaseErrorMessage,
-  hasCompletedOnboarding,
   LOGIN_URL,
   setLoading,
   userToProfile,
   waitForAuthUser
 } from './auth.js';
+import { initPasswordFields } from './auth-fields.js';
 
-let isSignUp = false;
 let redirecting = false;
 
 const googleProvider = new GoogleAuthProvider();
@@ -45,22 +43,10 @@ function showLoginForm() {
   if (loading) loading.classList.add('hidden');
 }
 
-function updateModeUI() {
-  const btn = document.getElementById('gemailbtn');
-  const toggle = document.getElementById('toggleMode');
-  if (btn) btn.textContent = isSignUp ? 'Crear cuenta' : 'Iniciar sesión';
-  if (toggle) {
-    toggle.textContent = isSignUp
-      ? '¿Ya tienes cuenta? Iniciar sesión'
-      : '¿No tienes cuenta? Crear cuenta';
-  }
-}
-
-function goAfterLogin(user, options = {}) {
+function goAfterLogin(user) {
   if (redirecting) return;
   redirecting = true;
-  const needsOnboarding = options.forceOnboarding || !hasCompletedOnboarding(user.uid);
-  enterApp(userToProfile(user), { forceOnboarding: needsOnboarding });
+  enterApp(userToProfile(user));
 }
 
 async function handleGoogleAuth() {
@@ -70,8 +56,7 @@ async function handleGoogleAuth() {
 
   try {
     const cred = await signInWithPopup(auth, googleProvider);
-    const info = getAdditionalUserInfo(cred);
-    goAfterLogin(cred.user, { forceOnboarding: info?.isNewUser === true });
+    goAfterLogin(cred.user);
   } catch (err) {
     if (err.code === 'auth/popup-closed-by-user') {
       setLoading(btn, false, 'Continuar con Google');
@@ -82,7 +67,7 @@ async function handleGoogleAuth() {
       signInWithRedirect(auth, googleProvider);
       return;
     }
-    showError(firebaseErrorMessage(err.code));
+    showError(firebaseErrorMessage(err));
     setLoading(btn, false, 'Continuar con Google');
   }
 }
@@ -104,66 +89,72 @@ async function handleEmailAuth(e) {
     return;
   }
 
-  setLoading(btn, true, isSignUp ? 'Crear cuenta' : 'Iniciar sesión');
+  setLoading(btn, true, 'Iniciar sesión');
 
   try {
-    const cred = isSignUp
-      ? await createUserWithEmailAndPassword(auth, email, password)
-      : await signInWithEmailAndPassword(auth, email, password);
-    goAfterLogin(cred.user, { forceOnboarding: isSignUp });
+    let methods = [];
+    try {
+      methods = await fetchSignInMethodsForEmail(auth, email);
+    } catch (e) {}
+
+    if (methods.length && !methods.includes('password')) {
+      const usesGoogle = methods.includes('google.com');
+      showError(
+        usesGoogle
+          ? 'Este email está registrado con Google. Usa «Continuar con Google».'
+          : 'Este email usa otro método de acceso. Prueba con Google o recupera tu cuenta.'
+      );
+      setLoading(btn, false, 'Iniciar sesión');
+      return;
+    }
+
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    goAfterLogin(cred.user);
   } catch (err) {
-    showError(firebaseErrorMessage(err.code));
-    setLoading(btn, false, isSignUp ? 'Crear cuenta' : 'Iniciar sesión');
+    console.error('Login error:', err?.code, err?.message);
+    showError(firebaseErrorMessage(err));
+    setLoading(btn, false, 'Iniciar sesión');
   }
 }
 
 function bindLoginForm() {
   document.getElementById('emailForm').addEventListener('submit', handleEmailAuth);
   document.getElementById('ggeneric').addEventListener('click', handleGoogleAuth);
-  document.getElementById('toggleMode').addEventListener('click', () => {
-    isSignUp = !isSignUp;
-    clearError();
-    updateModeUI();
-  });
-  updateModeUI();
+  initPasswordFields();
   showLoginForm();
 }
 
 async function initLogin() {
-  let forceOnboarding = false;
   let userFromRedirect = null;
+  const justLoggedOut = new URLSearchParams(window.location.search).get('logout') === '1';
 
   // IMPORTANT: process Google redirect BEFORE any URL change
   try {
     const result = await getRedirectResult(auth);
-    if (result?.user) {
-      userFromRedirect = result.user;
-      const info = getAdditionalUserInfo(result);
-      forceOnboarding = info?.isNewUser === true;
-    }
+    if (result?.user) userFromRedirect = result.user;
   } catch (err) {
     const btn = document.getElementById('ggeneric');
     setLoading(btn, false, 'Continuar con Google');
     showError(
       err.code === 'auth/operation-not-allowed'
         ? 'Google no está activado en Firebase. Ve a Authentication → Sign-in method → Google → Enable.'
-        : firebaseErrorMessage(err.code)
+        : firebaseErrorMessage(err)
     );
     bindLoginForm();
     return;
   }
 
-  const user = userFromRedirect || await waitForAuthUser(3000);
-
-  if (user) {
-    goAfterLogin(user, { forceOnboarding });
-    return;
+  if (!justLoggedOut) {
+    const user = userFromRedirect || await waitForAuthUser(1500);
+    if (user) {
+      goAfterLogin(user);
+      return;
+    }
   }
 
   // Normalize URL only after OAuth is processed
-  if (window.location.pathname.endsWith('/index.html')) {
-    window.location.replace(LOGIN_URL);
-    return;
+  if (window.location.pathname.endsWith('/index.html') || window.location.search) {
+    window.history.replaceState({}, '', LOGIN_URL);
   }
 
   bindLoginForm();

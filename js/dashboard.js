@@ -14,13 +14,14 @@
     guardados: ['Guardados', 'Los empleos que marcaste con ★'],
     answers: ['Answer Library', 'Respuestas comunes reutilizables'],
     prefs: ['Preferencias', 'Tu perfil de búsqueda'],
+    cuenta: ['Mi cuenta', 'Perfil, configuración y sesión'],
     inbox: ['Inbox', 'Buzón dedicado'],
     docs: ['Documentos', 'CV, cartas y kits'],
     entrevista: ['Entrevista', 'Coaching con IA']
   };
 
   function show(view) {
-    ['dashboard', 'buscar', 'guardados', 'answers', 'prefs', 'inbox', 'docs', 'entrevista'].forEach(v => {
+    ['dashboard', 'buscar', 'guardados', 'answers', 'prefs', 'cuenta', 'inbox', 'docs', 'entrevista'].forEach(v => {
       const el = $('v-' + v);
       if (el) el.classList.toggle('hidden', v !== view);
     });
@@ -31,7 +32,13 @@
     if (view === 'guardados') renderSaved();
     if (view === 'answers') renderAnswers();
     if (view === 'prefs') renderPrefs();
+    if (view === 'cuenta') {
+      renderAccount();
+      if (window.iwPaintUser) window.iwPaintUser();
+    }
   }
+
+  window.iwShowView = show;
 
   document.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', () => show(a.dataset.view)));
   $('hamb').addEventListener('click', () => $('side').classList.toggle('open'));
@@ -284,11 +291,36 @@
     renderAnswers();
   });
 
-  function renderPrefs() {
+  function accountRows() {
     const s = InstaWorkEngine.getState();
-    const p = s.preferences;
+    const p = s.preferences || {};
     const pr = s.profile || {};
-    $('prefbody').innerHTML = `<b>Nombre:</b> ${esc(pr.fullname || '—')}<br><b>Roles:</b> ${esc((p.titles || []).join(', ') || '—')}<br><b>País:</b> ${esc(p.country || '—')} · <b>Remoto:</b> ${p.remote ? 'sí' : 'no'}<br><b>Modo:</b> ${esc(s.apply_mode)} · <b>Frescura máx:</b> ${s.max_age_days} días · <b>Fit mínimo:</b> ${s.min_fit}<br><b>Créditos:</b> ${s.credits}`;
+    const provider = pr.provider === 'google.com' ? 'Google' : (pr.provider === 'password' ? 'Email y contraseña' : (pr.provider || '—'));
+    return [
+      ['Nombre', pr.fullname || '—'],
+      ['Email', pr.email || '—'],
+      ['Método de acceso', provider],
+      ['Roles buscados', (p.titles || []).join(', ') || '—'],
+      ['País', p.country || '—'],
+      ['Modo de postulación', s.apply_mode || '—'],
+      ['Créditos disponibles', String(s.credits ?? '—')]
+    ];
+  }
+
+  function renderPrefGrid(targetId) {
+    const el = $(targetId);
+    if (!el) return;
+    el.innerHTML = accountRows().map(([k, v]) =>
+      `<div class="pref-row"><span class="pref-key">${esc(k)}</span><span class="pref-val">${esc(v)}</span></div>`
+    ).join('');
+  }
+
+  function renderPrefs() {
+    renderPrefGrid('prefbody');
+  }
+
+  function renderAccount() {
+    renderPrefGrid('accountBody');
   }
 
   refreshTop();

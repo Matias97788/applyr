@@ -4,7 +4,23 @@
   const S = { source: 'resume', titles: [], mode: 'auto', notify: {}, aiTitleSuggestions: [] };
   let step = 0;
   const TITLES_STEP = 3;
+  const LAST_STEP = 15;
   const view = document.getElementById('view');
+
+  function markOnboardingDoneLocal() {
+    try {
+      let uid = sessionStorage.getItem('instawork_uid');
+      if (!uid) {
+        const p = InstaWorkEngine.getProfile();
+        uid = p && p.uid;
+      }
+      if (uid) localStorage.setItem('instawork_done_' + uid, '1');
+      localStorage.setItem('instawork_done', '1');
+      const w = JSON.parse(localStorage.getItem('instawork_wizard') || '{}');
+      w.completed = true;
+      localStorage.setItem('instawork_wizard', JSON.stringify(w));
+    } catch (e) {}
+  }
 
   const STEPS = [
     () => `<h1>Antes de continuar, revisa estos términos</h1>
@@ -545,6 +561,7 @@
     persist();
     window.scrollTo(0, 0);
     if (step === TITLES_STEP) initTitlesStep();
+    if (step === LAST_STEP) markOnboardingDoneLocal();
   }
 
   window.next = function () {
@@ -571,11 +588,7 @@
   };
 
   window.goDash = function () {
-    try {
-      const uid = InstaWorkEngine.getProfile().uid;
-      if (uid) localStorage.setItem('instawork_done_' + uid, '1');
-      else localStorage.setItem('instawork_done', '1');
-    } catch (e) {}
+    markOnboardingDoneLocal();
     window.location.replace('dashboard.html');
   };
 
@@ -599,6 +612,16 @@
 
   restore();
   prefillFromProfile();
+
+  try {
+    const uid = sessionStorage.getItem('instawork_uid') || (InstaWorkEngine.getProfile() || {}).uid;
+    if (uid && localStorage.getItem('instawork_done_' + uid) === '1') {
+      window.location.replace('dashboard.html');
+    } else if (localStorage.getItem('instawork_done') === '1') {
+      window.location.replace('dashboard.html');
+    }
+  } catch (e) {}
+
   render();
 
   function prefillFromProfile() {
