@@ -33,6 +33,12 @@
       }`;
     },
     () => {
+      if (S.cvText && window.InstaWorkAnalyzer) {
+        try {
+          const a = window.InstaWorkAnalyzer.analyze(S.cvText);
+          S.cvSkills = a.skills; S.cvArea = a.areaLabel; S.cvRoles = a.titles;
+        } catch (e) {}
+      }
       const my = step;
       setTimeout(() => { if (step === my) next(); }, 6000);
       const sk = (S.cvSkills || []);
