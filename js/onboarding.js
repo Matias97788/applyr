@@ -9,7 +9,6 @@
     aiTitleSuggestions: [], answers: {}, form: {}
   };
   let stepIdx = 0;
-  let advanceTimer = null;
   const view = document.getElementById('view');
 
   /* ── helpers ── */
@@ -82,14 +81,12 @@
     if (i >= 0) arr.splice(i, 1);
     else arr.push(v);
     setVal(key, arr);
-    renderStep();
+    render();
   }
 
   function selectSingle(key, v) {
     setVal(key, v);
-    renderStep();
-    clearTimeout(advanceTimer);
-    advanceTimer = setTimeout(() => goNext(), 180);
+    render();
   }
 
   function showError(msg) {
@@ -197,17 +194,6 @@
     return null;
   }
 
-  function goNext() {
-    captureCurrent();
-    const st = currentStep();
-    const err = validateStep(st);
-    if (err) { showError(err); return; }
-    clearError();
-    syncPrefsToEngine();
-    const steps = activeSteps();
-    if (stepIdx < steps.length - 1) { stepIdx++; renderStep(); }
-  }
-
   /* ── renderers by type ── */
   function renderInfo(st) {
     let body = '';
@@ -225,7 +211,7 @@
       const on = sel === o.v ? ' on' : '';
       const tag = o.tag ? `<span class="opt-tag">${esc(o.tag)}</span>` : '';
       const desc = o.d ? `<small>${esc(o.d)}</small>` : '';
-      return `<button type="button" class="opt-card${on}" data-wiz-select="${esc(st.key)}" data-wiz-val="${esc(o.v)}"><span class="opt-rd"></span><div><b>${esc(o.t)}</b>${tag}${desc}</div></button>`;
+      return `<button type="button" class="opt-card${on}" onclick="wizSelect('${st.key}','${o.v}')"><span class="opt-rd"></span><div><b>${esc(o.t)}</b>${tag}${desc}</div></button>`;
     }).join('');
     const disabled = !sel ? ' disabled' : '';
     return `${renderProgress()}<h1>${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}<div class="opt-list">${opts}</div><button class="btn primary${disabled}" onclick="wizNext()"${disabled ? ' disabled' : ''}>Continuar</button>`;
@@ -235,7 +221,7 @@
     const arr = getVal(st.key) || [];
     const opts = (st.options || []).map(o => {
       const on = arr.includes(o.v) ? ' on' : '';
-      return `<button type="button" class="opt-card check${on}" data-wiz-toggle="${esc(st.key)}" data-wiz-val="${esc(o.v)}"><span class="opt-chk">${on ? '✓' : ''}</span><b>${esc(o.t)}</b></button>`;
+      return `<button type="button" class="opt-card check${on}" onclick="wizToggle('${st.key}','${o.v}')"><span class="opt-chk">${on ? '✓' : ''}</span><b>${esc(o.t)}</b></button>`;
     }).join('');
     const min = st.min || 1;
     const disabled = arr.length < min ? ' disabled' : '';
@@ -310,7 +296,7 @@
     ];
     const done = checks.filter(c => c.ok).length;
     const pct = Math.round((done / checks.length) * 100);
-    setTimeout(() => { if (currentStep()?.id === 'matching') goNext(); }, 3500);
+    setTimeout(() => { if (currentStep()?.id === 'matching') wizNext(); }, 3500);
     const list = checks.map(c =>
       `<div class="match-check${c.ok ? ' ok' : ''}"><span class="match-dot">${c.ok ? '✓' : '○'}</span>${esc(c.l)}</div>`
     ).join('');
@@ -379,7 +365,7 @@
         S.cvSkills = a.skills; S.cvArea = a.areaLabel; S.cvRoles = a.titles;
       } catch (e) {}
     }
-    setTimeout(() => { if (currentStep()?.id === 'cv-reading') goNext(); }, 5000);
+    setTimeout(() => { if (currentStep()?.id === 'cv-reading') wizNext(); }, 5000);
     const sk = S.cvSkills || [];
     const body = sk.length
       ? `<b>Detectamos ${sk.length} habilidades${S.cvArea ? ' · Área: ' + esc(S.cvArea) : ''}:</b>
@@ -559,25 +545,6 @@
     window.scrollTo(0, 0);
     if (st.id === 'titles') initTitlesStep();
     if (st.id === 'done') markOnboardingDoneLocal();
-    bindStepEvents();
-  }
-
-  function bindStepEvents() {
-    if (view._wizBound) return;
-    view._wizBound = true;
-    view.addEventListener('click', (e) => {
-      const sel = e.target.closest('[data-wiz-select]');
-      if (sel) {
-        e.preventDefault();
-        selectSingle(sel.dataset.wizSelect, sel.dataset.wizVal);
-        return;
-      }
-      const tog = e.target.closest('[data-wiz-toggle]');
-      if (tog) {
-        e.preventDefault();
-        toggleMulti(tog.dataset.wizToggle, tog.dataset.wizVal);
-      }
-    });
   }
 
   function restoreFormValues() {
@@ -635,12 +602,20 @@
   }
 
   /* ── window API ── */
-  window.wizNext = goNext;
-  window.next = goNext;
+  window.wizNext = function () {
+    captureCurrent();
+    const st = currentStep();
+    const err = validateStep(st);
+    if (err) { showError(err); return; }
+    clearError();
+    syncPrefsToEngine();
+    const steps = activeSteps();
+    if (stepIdx < steps.length - 1) { stepIdx++; renderStep(); }
+  };
 
   window.wizSelect = function (key, v) { selectSingle(key, v); };
   window.wizToggle = function (key, v) { toggleMulti(key, v); };
-  window.wizYesNo = function (key, v) { setVal(key, v); renderStep(); setTimeout(goNext, 300); };
+  window.wizYesNo = function (key, v) { setVal(key, v); renderStep(); setTimeout(wizNext, 300); };
   window.wizSlider = function (key, v, el) {
     setVal(key, +v);
     const st = currentStep();
@@ -669,6 +644,7 @@
     if (stepIdx > 0) { stepIdx--; renderStep(); }
     else window.location.replace('/');
   };
+  window.next = window.wizNext;
   window.setMode = function (m) { S.mode = m; renderStep(); };
   window.setSource = function (s) { S.source = s; renderStep(); };
 
@@ -753,7 +729,7 @@
       const e = document.getElementById('g' + i);
       if (e) { e.innerHTML = e.innerHTML.replace('◦', '<span class="b">✓</span>'); e.classList.add('done'); }
     }, 600 * (i + 1)));
-    setTimeout(() => { if (stepIdx === my) goNext(); }, 3000);
+    setTimeout(() => { if (stepIdx === my) wizNext(); }, 3000);
   }
 
   function markOnboardingDoneLocal() {
