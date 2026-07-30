@@ -6,7 +6,7 @@
   <title>instaWork — Configuración</title>
   <link rel="stylesheet" href="css/variables.css"/>
   <link rel="stylesheet" href="css/base.css"/>
-  <link rel="stylesheet" href="css/onboarding.css?v=5"/>
+  <link rel="stylesheet" href="css/onboarding.css?v=6"/>
 </head>
 <body class="auth-pending">
   <header>
@@ -27,12 +27,13 @@
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
   </script>
-  <script src="js/engine.js?v=5"></script>
+  <script src="js/engine.js?v=6"></script>
+  <script src="js/onboarding-steps.js?v=6"></script>
   <script type="module">
-    import { suggestJobTitles, filterSuggestions, fallbackTitleSuggestions, esc } from './js/ai-titles.js?v=5';
+    import { suggestJobTitles, filterSuggestions, fallbackTitleSuggestions, esc } from './js/ai-titles.js?v=6';
     window.InstaWorkAITitles = { suggestJobTitles, filterSuggestions, fallbackTitleSuggestions, esc };
   </script>
-  <script type="module" src="js/auth-guard.js?v=5"></script>
-  <script src="js/onboarding.js?v=5"></script>
+  <script type="module" src="js/auth-guard.js?v=6"></script>
+  <script src="js/onboarding.js?v=6"></script>
 </body>
 </html>
