@@ -1,3 +1,27 @@
+/* Hydrate onboarding prefs into engine (instaWork) */
+(function hydrateOnboardingPrefs() {
+  try {
+    var raw = localStorage.getItem('instawork_onboarding_answers');
+    if (!raw || !window.InstaWorkEngine) return;
+    var o = JSON.parse(raw);
+    var prefs = Object.assign({}, o.answers || {}, {
+      titles: o.titles || [],
+      mode: o.mode,
+      skills: o.skills || [],
+      excludeCompanies: o.excludeList || []
+    });
+    InstaWorkEngine.setPreferences(prefs);
+    if (o.form || o.experience || o.linkedin) {
+      InstaWorkEngine.setProfile(Object.assign({}, o.form || {}, {
+        experience: o.experience || [],
+        educationHistory: o.education || [],
+        skills: o.skills || [],
+        linkedin: o.linkedin || (o.form && o.form.linkedin) || ''
+      }));
+    }
+  } catch (e) {}
+})();
+
 (function () {
   'use strict';
 
