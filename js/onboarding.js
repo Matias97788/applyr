@@ -211,12 +211,18 @@
   /* ── renderers by type ── */
   function renderInfo(st) {
     let body = '';
-    if (st.icon) body += `<div class="info-icon">${st.icon}</div>`;
+    if (st.icon) {
+      const iconKey = ({
+        '🏃': 'run', '🚀': 'rocket', '🧭': 'compass', '😤': 'stress', '🧩': 'puzzle',
+        '📊': 'chart', '🔍': 'search', '📋': 'list', '🖨️': 'print', '📝': 'edit', '📈': 'growth'
+      })[st.icon] || 'spark';
+      body += `<div class="info-icon info-icon--${iconKey}" aria-hidden="true"></div>`;
+    }
     if (st.body) body += st.body;
     if (st.bullets) {
       body += '<ul class="info-bullets">' + st.bullets.map(b => `<li>${esc(b)}</li>`).join('') + '</ul>';
     }
-    return `${renderProgress()}<h1>${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}${body ? `<div class="card info-card">${body}</div>` : ''}<button class="btn primary" onclick="wizNext()">Continuar</button>`;
+    return `${renderProgress()}<h1 class="wiz-title">${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}${body ? `<div class="card info-card">${body}</div>` : ''}<button type="button" class="btn primary" onclick="wizNext()">Continuar</button>`;
   }
 
     function renderSingle(st) {
@@ -235,7 +241,8 @@
       }
       return `<button type="button" class="opt-card${on}" data-wiz-select="${esc(st.key)}" data-wiz-val="${esc(o.v)}"><span class="opt-rd"></span><div><b>${esc(o.t)}</b>${tag}${desc}</div></button>`;
     }).join('');
-    return `<div class="opt-list${product ? ' opt-list--product' : ''}">${opts}</div>`;
+    const list = `<div class="opt-list${product ? ' opt-list--product' : ''}">${opts}</div>`;
+    return `${renderProgress()}<h1 class="wiz-title">${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}${list}`;
   }
 
   function renderMulti(st) {
@@ -246,13 +253,13 @@
     }).join('');
     const min = st.min || 1;
     const disabled = arr.length < min ? ' disabled' : '';
-    return `${renderProgress()}<h1>${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}<div class="opt-list">${opts}</div><button class="btn primary${disabled}" onclick="wizNext()"${disabled ? ' disabled' : ''}>Continuar</button>`;
+    return `${renderProgress()}<h1 class="wiz-title">${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}<div class="opt-list">${opts}</div><button type="button" class="btn primary${disabled}" onclick="wizNext()"${disabled ? ' disabled' : ''}>Continuar</button>`;
   }
 
   function renderYesNo(st) {
     const val = getVal(st.key);
-    return `${renderProgress()}<h1>${esc(st.title)}</h1>
-      <div class="card statement-card"><p>"${esc(st.statement)}"</p></div>
+    return `${renderProgress()}<h1 class="wiz-title">${esc(st.title)}</h1>
+      <div class="card statement-card"><p>“${esc(st.statement)}”</p></div>
       <div class="yn-row">
         <button type="button" class="yn-btn${val === false ? ' on' : ''}" onclick="wizYesNo('${st.key}',false)">No</button>
         <button type="button" class="yn-btn${val === true ? ' on' : ''}" onclick="wizYesNo('${st.key}',true)">Sí</button>
