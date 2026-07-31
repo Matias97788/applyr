@@ -1278,3 +1278,189 @@ main h1, .wiz-title {
   border-color: var(--brand);
   background: #fbfaff;
 }
+
+/* Wizard polish — AIApply-like hierarchy */
+.wiz-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+  text-align: center;
+  margin: 4px 0 10px;
+  color: var(--ink);
+}
+
+main .sub {
+  max-width: 440px;
+  font-size: 15px;
+  line-height: 1.55;
+  margin-bottom: 22px;
+}
+
+.hbar {
+  max-width: 720px;
+}
+
+.wizard-logo {
+  font-family: var(--font-display);
+  letter-spacing: -.03em;
+}
+
+.back {
+  border-radius: 12px;
+  border-color: var(--line);
+  color: var(--ink);
+  transition: background .15s, border-color .15s;
+}
+.back:hover {
+  background: var(--soft);
+  border-color: #c4b5fd;
+}
+
+.prog {
+  height: 4px;
+  background: #ebe7f5;
+}
+.prog > i {
+  background: linear-gradient(90deg, var(--brand), var(--brand2));
+  border-radius: 0 4px 4px 0;
+}
+
+.wiz-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--brand);
+  margin: 4px 0 18px;
+}
+
+.opt-card {
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.9) inset;
+}
+.opt-card:hover {
+  border-color: #c4b5fd;
+  box-shadow: 0 8px 20px rgba(104, 80, 250, .06);
+}
+.opt-card.on {
+  background: linear-gradient(180deg, #fbfaff 0%, #f7f6ff 100%);
+}
+
+.statement-card {
+  border: 1px solid #ebe4ff;
+  background: linear-gradient(180deg, #fff 0%, #f7f6ff 100%);
+  border-radius: 18px;
+}
+.statement-card p {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+
+.yn-btn {
+  border-radius: 16px;
+  min-height: 56px;
+}
+.yn-btn.on {
+  box-shadow: 0 0 0 1px var(--brand) inset, 0 8px 20px rgba(104, 80, 250, .1);
+}
+
+.info-card {
+  border-radius: 18px;
+  border-color: #ebe4ff;
+  background: linear-gradient(180deg, #fff 0%, #fcfbff 100%);
+}
+
+.info-icon {
+  width: 64px;
+  height: 64px;
+  margin: 4px auto 16px;
+  border-radius: 18px;
+  background: var(--soft);
+  position: relative;
+  font-size: 0;
+}
+.info-icon::before {
+  content: '';
+  position: absolute;
+  inset: 18px;
+  border-radius: 8px;
+  background: var(--brand);
+  opacity: .9;
+}
+.info-icon--rocket::before {
+  clip-path: polygon(50% 8%, 72% 42%, 62% 42%, 62% 78%, 38% 78%, 38% 42%, 28% 42%);
+}
+.info-icon--run::before {
+  border-radius: 50%;
+  inset: 16px;
+}
+.info-icon--chart::before,
+.info-icon--growth::before {
+  inset: auto 16px 16px 16px;
+  height: 28px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(90deg, var(--brand) 0 30%, var(--brand2) 30% 60%, #a78bfa 60% 100%);
+  clip-path: none;
+}
+.info-icon--search::before {
+  border-radius: 50%;
+  inset: 16px 16px 22px 22px;
+  box-shadow: 10px 10px 0 -6px var(--brand);
+  background: transparent;
+  border: 3px solid var(--brand);
+}
+.info-icon--puzzle::before,
+.info-icon--spark::before,
+.info-icon--compass::before,
+.info-icon--list::before,
+.info-icon--edit::before,
+.info-icon--print::before,
+.info-icon--stress::before {
+  border-radius: 10px;
+}
+
+.stat-bar {
+  background: linear-gradient(180deg, var(--brand2), var(--brand));
+  width: 52px;
+  border-radius: 8px 8px 4px 4px;
+}
+.stat-col b {
+  font-family: var(--font-display);
+  letter-spacing: -.02em;
+}
+
+.slider-card {
+  border-radius: 18px;
+  border-color: #ebe4ff;
+  text-align: center;
+  padding: 28px 22px;
+}
+.slider-val {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  color: var(--brand);
+  margin-bottom: 18px;
+}
+
+.btn.primary:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (min-width: 720px) {
+  .opt-list--product {
+    grid-template-columns: 1fr;
+  }
+  main {
+    max-width: 560px;
+    padding-top: 28px;
+  }
+}
