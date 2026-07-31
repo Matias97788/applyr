@@ -19,12 +19,13 @@
     {
       id: 'service-path', section: 'start', type: 'single',
       title: '¿Qué te gustaría hacer?',
-      subtitle: 'Elige el camino que mejor se adapte a ti.',
+      subtitle: 'Elige la opción que coincida con tu objetivo. Puedes cambiar después.',
       key: 'servicePath', required: true,
+      layout: 'product',
       options: [
-        { v: 'resume', t: 'Crear CV y cartas de presentación', d: 'Genera documentos optimizados para cada empleo.' },
-        { v: 'auto', t: 'Postular automáticamente', d: 'Encuentra empleos y postula por ti.', tag: 'Más popular' },
-        { v: 'interview', t: 'Ayuda en entrevistas en vivo', d: 'Practica y recibe coaching en tiempo real.' }
+        { v: 'auto', t: 'Postular automáticamente', d: 'La IA encuentra roles compatibles y postula por ti cada día.', tag: 'Más popular', preview: 'auto' },
+        { v: 'resume', t: 'Crear CV y cartas', d: 'Documentos optimizados ATS, personalizados a cada empleo.', preview: 'resume' },
+        { v: 'interview', t: 'Ayuda en entrevistas en vivo', d: 'Práctica con IA y sugerencias en tiempo real.', preview: 'interview' }
       ]
     },
 

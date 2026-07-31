@@ -4,80 +4,107 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>instaWork — Crear cuenta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/variables.css"/>
   <link rel="stylesheet" href="css/base.css"/>
-  <link rel="stylesheet" href="css/login.css?v=3"/>
+  <link rel="stylesheet" href="css/login.css?v=4"/>
 </head>
 <body class="login-page">
-  <div class="login-header">
-    <span class="logo">insta<span>Work</span></span>
-  </div>
-
-  <div class="login-wrap">
-    <p id="authLoading" class="sub">Verificando sesión…</p>
-    <div id="registerContent" class="hidden">
-      <div class="card login-card">
-        <h1>Crea tu cuenta</h1>
-        <p class="sub">Regístrate gratis y configura tu búsqueda automática de empleo.</p>
-
-        <button type="button" id="googleRegister" class="btn primary google-btn">Registrarse con Google</button>
-        <div class="login-divider">o</div>
-
-        <form id="registerForm" class="login-form">
-          <label class="field">
-            <span class="field-label">Nombre completo</span>
-            <div class="field-input">
-              <span class="field-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M5 20c1.5-3 4.5-5 7-5s5.5 2 7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              </span>
-              <input id="fullname" type="text" placeholder="Tu nombre y apellido" autocomplete="name" required/>
-            </div>
-          </label>
-
-          <label class="field">
-            <span class="field-label">Email</span>
-            <div class="field-input">
-              <span class="field-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              </span>
-              <input id="email" type="email" placeholder="tu@email.com" autocomplete="email" required/>
-            </div>
-          </label>
-
-          <label class="field">
-            <span class="field-label">Contraseña</span>
-            <div class="field-input field-input--password">
-              <span class="field-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              </span>
-              <input id="password" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" minlength="6" required/>
-              <button type="button" class="field-toggle" aria-label="Mostrar contraseña"></button>
-            </div>
-            <div class="pwd-strength hidden" id="pwdStrength">
-              <div class="pwd-strength-track"><div class="pwd-strength-bar"></div></div>
-              <span class="pwd-strength-label"></span>
-            </div>
-          </label>
-
-          <label class="field">
-            <span class="field-label">Confirmar contraseña</span>
-            <div class="field-input field-input--password">
-              <span class="field-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              </span>
-              <input id="password2" type="password" placeholder="Repite tu contraseña" autocomplete="new-password" minlength="6" required/>
-              <button type="button" class="field-toggle" aria-label="Mostrar contraseña"></button>
-            </div>
-          </label>
-
-          <p id="registerError" class="login-error hidden"></p>
-          <button type="submit" id="registerBtn" class="btn primary">Crear cuenta</button>
-        </form>
-
-        <a href="index.html" class="login-toggle">¿Ya tienes cuenta? Iniciar sesión</a>
-        <p class="sub login-legal">Al registrarte aceptas los Términos y la Política de Privacidad.</p>
+  <div class="auth-shell">
+    <section class="auth-panel auth-panel--form">
+      <div class="auth-brand">
+        <span class="logo">insta<span>Work</span></span>
       </div>
-    </div>
+
+      <div class="login-wrap">
+        <p id="authLoading" class="sub">Verificando sesión…</p>
+        <div id="registerContent" class="hidden">
+          <div class="card login-card">
+            <p class="auth-eyebrow">Empieza gratis</p>
+            <h1>Crea tu cuenta</h1>
+            <p class="sub">Configura tu búsqueda automática de empleo en minutos.</p>
+
+            <button type="button" id="googleRegister" class="btn primary google-btn">
+              <span class="g-icon" aria-hidden="true"></span>
+              Registrarse con Google
+            </button>
+            <div class="login-divider">o</div>
+
+            <form id="registerForm" class="login-form">
+              <label class="field">
+                <span class="field-label">Nombre completo</span>
+                <div class="field-input">
+                  <span class="field-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M5 20c1.5-3 4.5-5 7-5s5.5 2 7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </span>
+                  <input id="fullname" type="text" placeholder="Tu nombre y apellido" autocomplete="name" required/>
+                </div>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Email</span>
+                <div class="field-input">
+                  <span class="field-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </span>
+                  <input id="email" type="email" placeholder="tu@email.com" autocomplete="email" required/>
+                </div>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Contraseña</span>
+                <div class="field-input field-input--password">
+                  <span class="field-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </span>
+                  <input id="password" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" minlength="6" required/>
+                  <button type="button" class="field-toggle" aria-label="Mostrar contraseña"></button>
+                </div>
+                <div class="pwd-strength hidden" id="pwdStrength">
+                  <div class="pwd-strength-track"><div class="pwd-strength-bar"></div></div>
+                  <span class="pwd-strength-label"></span>
+                </div>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Confirmar contraseña</span>
+                <div class="field-input field-input--password">
+                  <span class="field-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </span>
+                  <input id="password2" type="password" placeholder="Repite tu contraseña" autocomplete="new-password" minlength="6" required/>
+                  <button type="button" class="field-toggle" aria-label="Mostrar contraseña"></button>
+                </div>
+              </label>
+
+              <p id="registerError" class="login-error hidden"></p>
+              <button type="submit" id="registerBtn" class="btn primary">Crear cuenta</button>
+            </form>
+
+            <a href="index.html" class="login-toggle">¿Ya tienes cuenta? Iniciar sesión</a>
+            <p class="sub login-legal">Al registrarte aceptas los Términos y la Política de Privacidad.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="auth-panel auth-panel--proof">
+      <div class="proof-inner">
+        <p class="proof-quote">“Configuré mis preferencias una vez y la IA empezó a postular a roles que sí encajan.”</p>
+        <p class="proof-attr">— Flujo instaWork</p>
+        <div class="proof-stat">
+          <strong>De setup a dashboard</strong>
+          <span>Onboarding guiado, CV y modo auto-apply en un solo camino.</span>
+        </div>
+        <ul class="proof-logos">
+          <li>CV + cartas</li>
+          <li>Auto-apply</li>
+          <li>Entrevistas</li>
+        </ul>
+      </div>
+    </aside>
   </div>
 
   <script src="js/engine.js"></script>

@@ -1,11 +1,11 @@
 :root {
-  --brand: #6d28d9;
-  --brand2: #7c3aed;
+  --brand: #6850fa;
+  --brand2: #7d70ff;
   --ink: #1a1630;
   --muted: #6b6785;
-  --line: #e7e3f2;
-  --soft: #f3efff;
-  --bg: #f3f2f7;
+  --line: #e4e0f2;
+  --soft: #f7f6ff;
+  --bg: #fafafa;
   --green: #16a34a;
   --greensoft: #e7f7ee;
   --amber: #b45309;
@@ -13,5 +13,9 @@
   --red: #dc2626;
   --redsoft: #fdeaea;
   --card: #fff;
-  --shadow: 0 1px 3px rgba(20, 10, 50, .06), 0 8px 24px rgba(20, 10, 50, .05);
+  --shadow: 0 1px 3px rgba(20, 10, 50, .06), 0 12px 32px rgba(104, 80, 250, .08);
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Outfit", "Inter", system-ui, sans-serif;
+  --radius-card: 20px;
+  --radius-btn: 14px;
 }

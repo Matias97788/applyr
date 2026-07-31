@@ -219,16 +219,23 @@
     return `${renderProgress()}<h1>${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}${body ? `<div class="card info-card">${body}</div>` : ''}<button class="btn primary" onclick="wizNext()">Continuar</button>`;
   }
 
-  function renderSingle(st) {
-    const sel = getVal(st.key);
+    function renderSingle(st) {
+    const product = st.layout === 'product' || st.id === 'service-path';
     const opts = (st.options || []).map(o => {
-      const on = sel === o.v ? ' on' : '';
+      const on = isSelected(st.key, o.v) ? ' on' : '';
       const tag = o.tag ? `<span class="opt-tag">${esc(o.tag)}</span>` : '';
       const desc = o.d ? `<small>${esc(o.d)}</small>` : '';
+      if (product) {
+        const prev = o.preview || o.v;
+        return `<button type="button" class="product-card${on}" data-wiz-select="${esc(st.key)}" data-wiz-val="${esc(o.v)}">
+          <div class="product-card-top">${tag}<span class="product-rd"></span></div>
+          <div class="product-preview product-preview--${esc(prev)}" aria-hidden="true"></div>
+          <div class="product-card-copy"><b>${esc(o.t)}</b>${desc}</div>
+        </button>`;
+      }
       return `<button type="button" class="opt-card${on}" data-wiz-select="${esc(st.key)}" data-wiz-val="${esc(o.v)}"><span class="opt-rd"></span><div><b>${esc(o.t)}</b>${tag}${desc}</div></button>`;
     }).join('');
-    const disabled = !sel ? ' disabled' : '';
-    return `${renderProgress()}<h1>${esc(st.title)}</h1>${st.subtitle ? `<p class="sub">${esc(st.subtitle)}</p>` : ''}<div class="opt-list">${opts}</div><button class="btn primary${disabled}" onclick="wizNext()"${disabled ? ' disabled' : ''}>Continuar</button>`;
+    return `<div class="opt-list${product ? ' opt-list--product' : ''}">${opts}</div>`;
   }
 
   function renderMulti(st) {

@@ -4,54 +4,81 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>instaWork — Iniciar sesión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/variables.css"/>
   <link rel="stylesheet" href="css/base.css"/>
-  <link rel="stylesheet" href="css/login.css?v=3"/>
+  <link rel="stylesheet" href="css/login.css?v=4"/>
 </head>
 <body class="login-page">
-  <div class="login-header">
-    <span class="logo">insta<span>Work</span></span>
-  </div>
+  <div class="auth-shell">
+    <section class="auth-panel auth-panel--form">
+      <div class="auth-brand">
+        <span class="logo">insta<span>Work</span></span>
+      </div>
 
-  <div class="login-wrap">
-    <p id="authLoading" class="sub">Verificando sesión…</p>
-    <div id="loginContent" class="hidden">
-    <div class="card login-card">
-      <h1>Bienvenido a instaWork</h1>
-      <p class="sub">Inicia sesión para empezar tu búsqueda automática.</p>
-      <button type="button" id="ggeneric" class="btn primary google-btn">Continuar con Google</button>
-      <div class="login-divider">o</div>
+      <div class="login-wrap">
+        <p id="authLoading" class="sub">Verificando sesión…</p>
+        <div id="loginContent" class="hidden">
+          <div class="card login-card">
+            <p class="auth-eyebrow">Bienvenido</p>
+            <h1>Entra a instaWork</h1>
+            <p class="sub">Primera vez? Te registramos al crear cuenta. Empieza tu búsqueda automática.</p>
+            <button type="button" id="ggeneric" class="btn primary google-btn">
+              <span class="g-icon" aria-hidden="true"></span>
+              Continuar con Google
+            </button>
+            <div class="login-divider">o</div>
 
-      <form id="emailForm" class="login-form">
-        <label class="field">
-          <span class="field-label">Email</span>
-          <div class="field-input">
-            <span class="field-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </span>
-            <input id="gemail" type="email" placeholder="tu@email.com" autocomplete="email" required/>
+            <form id="emailForm" class="login-form">
+              <label class="field">
+                <span class="field-label">Email</span>
+                <div class="field-input">
+                  <span class="field-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </span>
+                  <input id="gemail" type="email" placeholder="tu@email.com" autocomplete="email" required/>
+                </div>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Contraseña</span>
+                <div class="field-input field-input--password">
+                  <span class="field-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </span>
+                  <input id="gpassword" type="password" placeholder="Mínimo 6 caracteres" autocomplete="current-password" minlength="6" required/>
+                  <button type="button" class="field-toggle" aria-label="Mostrar contraseña"></button>
+                </div>
+              </label>
+
+              <p id="loginError" class="login-error hidden"></p>
+              <button type="submit" id="gemailbtn" class="btn primary">Continuar</button>
+            </form>
+
+            <a href="registro.html" class="login-toggle">¿No tienes cuenta? Crear cuenta</a>
+            <p class="sub login-legal">Al continuar aceptas los Términos y la Política de Privacidad.</p>
           </div>
-        </label>
+        </div>
+      </div>
+    </section>
 
-        <label class="field">
-          <span class="field-label">Contraseña</span>
-          <div class="field-input field-input--password">
-            <span class="field-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </span>
-            <input id="gpassword" type="password" placeholder="Mínimo 6 caracteres" autocomplete="current-password" minlength="6" required/>
-            <button type="button" class="field-toggle" aria-label="Mostrar contraseña"></button>
-          </div>
-        </label>
-
-        <p id="loginError" class="login-error hidden"></p>
-        <button type="submit" id="gemailbtn" class="btn primary">Iniciar sesión</button>
-      </form>
-
-      <a href="registro.html" class="login-toggle">¿No tienes cuenta? Crear cuenta</a>
-      <p class="sub login-legal">Al continuar aceptas los Términos y la Política de Privacidad.</p>
-    </div>
-    </div>
+    <aside class="auth-panel auth-panel--proof" aria-hidden="false">
+      <div class="proof-inner">
+        <p class="proof-quote">“En días pasé de enviar CVs a mano a tener postulaciones listas mientras preparo entrevistas.”</p>
+        <p class="proof-attr">— Candidatos instaWork</p>
+        <div class="proof-stat">
+          <strong>Postulación automática</strong>
+          <span>IA encuentra roles, adapta tu perfil y postula por ti.</span>
+        </div>
+        <ul class="proof-logos">
+          <li>Remoto</li>
+          <li>Full-time</li>
+          <li>ATS-ready</li>
+        </ul>
+      </div>
+    </aside>
   </div>
 
   <script src="js/engine.js"></script>
