@@ -9,6 +9,40 @@
     aiTitleSuggestions: [], answers: {}, form: {},
     experience: [], education: [], skills: [], references: [], excludeList: []
   };
+
+  /* Analyzer local si no existe InstaWorkAnalyzer en engine */
+  if (!window.InstaWorkAnalyzer) {
+    window.InstaWorkAnalyzer = {
+      detectSkills(t) {
+        const low = (t || '').toLowerCase();
+        const dict = ['javascript','python','react','node','sql','excel','marketing','ventas','python','figma','seo','html','css','typescript','java','aws','docker','liderazgo','comunicacion','comunicación','gestión','gestion','agile','scrum','wordpress','shopify','salesforce','crm','inglés','ingles','english'];
+        return dict.filter(s => low.includes(s)).map(name => ({ name }));
+      },
+      inferTitles(skills, cvText) {
+        const low = ((cvText || '') + ' ' + (skills || []).join(' ')).toLowerCase();
+        const out = [];
+        if (/market|seo|content|brand/.test(low)) out.push('Marketing Specialist', 'Digital Marketing');
+        if (/develop|javascript|react|python|software|engineer/.test(low)) out.push('Software Developer', 'Full Stack Developer');
+        if (/design|figma|ux|ui/.test(low)) out.push('Product Designer', 'UX Designer');
+        if (/sales|venta|account/.test(low)) out.push('Account Executive', 'Sales Representative');
+        if (/data|analy|sql/.test(low)) out.push('Data Analyst');
+        if (!out.length) out.push('Profesional', 'Analista', 'Especialista');
+        return out.slice(0, 6);
+      },
+      analyze(t) {
+        const skills = this.detectSkills(t).map(x => x.name);
+        const titles = this.inferTitles(skills, t);
+        let areaLabel = 'General';
+        const low = (t || '').toLowerCase();
+        if (/market|seo/.test(low)) areaLabel = 'Marketing';
+        else if (/develop|software|engineer|javascript|python/.test(low)) areaLabel = 'Tecnología';
+        else if (/design|ux|ui/.test(low)) areaLabel = 'Diseño';
+        else if (/sales|venta/.test(low)) areaLabel = 'Ventas';
+        return { skills, titles, areaLabel };
+      }
+    };
+  }
+
   let stepIdx = 0;
   let advanceTimer = null;
   const view = document.getElementById('view');
@@ -131,12 +165,13 @@
     }
 
     if (st.type === 'custom-cv') {
-      if (!S.cv && S.source === 'resume') return 'Sube tu CV o haz clic en "Omitir por ahora" para continuar.';
       if (S.source === 'linkedin') {
-        const v = (document.getElementById('linkedinUrl')?.value || '').trim();
-        if (!v) return 'Pega tu URL de LinkedIn para continuar.';
+        const v = (document.getElementById('linkedinUrl')?.value || S.linkedin || '').trim();
+        if (!v) return 'Pega tu URL de LinkedIn o cambia a Subir CV.';
         if (!/linkedin\.com/i.test(v)) return 'Pega una URL válida de LinkedIn (linkedin.com/in/...).';
+        return null;
       }
+      if (!S.cv && !S.cvSkipped) return 'Sube tu CV o pulsa "Omitir por ahora".';
       return null;
     }
 
@@ -1074,9 +1109,15 @@
   };
 
   window.wizSkipCv = function () {
+    S.cvSkipped = true;
     S.cv = S.cv || '';
     S.cvMsg = 'Omitido';
-    goNext();
+    clearError();
+    // skip reading animation if nothing to parse
+    const steps = activeSteps();
+    const idx = steps.findIndex(s => s.id === 'work-status');
+    if (idx >= 0) { stepIdx = idx; persist(); renderStep(); }
+    else goNext();
   };
 
   window.wizStartLinkedinScan = function () {
@@ -1343,17 +1384,29 @@
     });
   }
 
-  document.addEventListener('click', e => {
-    const add = e.target.closest('.addbtn');
-    if (add) { e.preventDefault(); const card = add.closest('.card'); if (card) { const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = 'Escribe aquí…'; inp.style.cssText = 'width:100%;margin-top:8px'; card.appendChild(inp); inp.focus(); } }
-  });
 
   restore();
+  try {
+    const prof = InstaWorkEngine.getProfile() || {};
+    S.form = S.form || {};
+    if (prof.fullname && !S.form.fullname) S.form.fullname = prof.fullname;
+    if (prof.displayName && !S.form.fullname) S.form.fullname = prof.displayName;
+    if (prof.name && !S.form.fullname) S.form.fullname = prof.name;
+    if (prof.email && !S.form.email) S.form.email = prof.email;
+    if (prof.phone && !S.form.phone) S.form.phone = prof.phone;
+    if (prof.linkedin && !S.linkedin) S.linkedin = prof.linkedin;
+    if (Array.isArray(prof.cvSkills) && !S.cvSkills?.length) S.cvSkills = prof.cvSkills;
+  } catch (e) {}
   try {
     const uid = sessionStorage.getItem('instawork_uid') || InstaWorkEngine.getProfile()?.uid;
     if ((uid && localStorage.getItem('instawork_done_' + uid) === '1') || localStorage.getItem('instawork_done') === '1') {
       window.location.replace('dashboard.html');
     }
   } catch (e) {}
+  // Reset wizard to start if corrupted step index
+  try {
+    const steps = activeSteps();
+    if (stepIdx < 0 || stepIdx >= steps.length) stepIdx = 0;
+  } catch (e) { stepIdx = 0; }
   renderStep();
 })();
