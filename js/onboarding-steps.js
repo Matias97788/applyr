@@ -4,6 +4,7 @@
 
   const SECTIONS = [
     { id: 'start', label: 'Comenzar' },
+    { id: 'resume', label: 'Tu CV' },
     { id: 'status', label: 'Situación actual' },
     { id: 'goals', label: 'Tus objetivos' },
     { id: 'ai', label: 'Experiencia IA' },
@@ -28,6 +29,13 @@
         { v: 'interview', t: 'Ayuda en entrevistas en vivo', d: 'Práctica con IA y sugerencias en tiempo real.', preview: 'interview' }
       ]
     },
+
+    /* ── CV / LINKEDIN (temprano, como AIApply) ── */
+    { id: 'cv-upload', section: 'resume', type: 'custom-cv' },
+    { id: 'linkedin-scan', section: 'resume', type: 'custom-linkedin-scan',
+      show: (S) => S.source === 'linkedin' },
+    { id: 'cv-reading', section: 'resume', type: 'custom-cv-reading',
+      show: (S) => S.source !== 'linkedin' || !!S.linkedin },
 
     /* ── SITUACIÓN ACTUAL ── */
     {
@@ -144,7 +152,7 @@
       id: 'remote-benefits', section: 'prefs', type: 'multi',
       title: '¿Qué es lo que más te gusta del trabajo remoto?',
       key: 'remoteBenefits', required: true, min: 1,
-      show: (S) => (S.workFormat || []).includes('remote'),
+      show: (S) => ((S.answers && S.answers.workFormat) || S.workFormat || []).includes('remote'),
       options: [
         { v: 'commute', t: 'Sin desplazamiento' },
         { v: 'flex', t: 'Horario flexible' },
@@ -157,14 +165,14 @@
       id: 'remote-locations', section: 'prefs', type: 'locations',
       title: '¿Dónde te gustaría trabajar remotamente?',
       key: 'remoteLocations', required: true, min: 1,
-      show: (S) => (S.workFormat || []).includes('remote'),
+      show: (S) => ((S.answers && S.answers.workFormat) || S.workFormat || []).includes('remote'),
       presets: ['Chile', 'Latinoamérica', 'Europa', 'Norteamérica', 'Mundial']
     },
     {
       id: 'onsite-locations', section: 'prefs', type: 'locations',
       title: '¿Dónde te gustaría trabajar de forma presencial?',
       key: 'onsiteLocations', required: true, min: 1,
-      show: (S) => (S.workFormat || []).includes('onsite') || (S.workFormat || []).includes('hybrid'),
+      show: (S) => { const f = (S.answers && S.answers.workFormat) || S.workFormat || []; return f.includes('onsite') || f.includes('hybrid'); },
       presets: ['Santiago', 'Valparaíso', 'Concepción', 'Remoto en Chile']
     },
     {
@@ -421,10 +429,8 @@
       icon: '📈'
     },
 
-    /* ── TU INFORMACIÓN (datos + CV) ── */
+    /* ── TU INFORMACIÓN ── */
     { id: 'terms', section: 'data', type: 'custom-terms' },
-    { id: 'cv-upload', section: 'data', type: 'custom-cv' },
-    { id: 'cv-reading', section: 'data', type: 'custom-cv-reading' },
     { id: 'photo', section: 'data', type: 'custom-photo' },
     { id: 'personal', section: 'data', type: 'custom-personal' },
     { id: 'address', section: 'data', type: 'custom-address' },

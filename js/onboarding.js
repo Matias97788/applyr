@@ -6,7 +6,8 @@
 
   const S = {
     source: 'resume', titles: [], mode: 'auto', notify: {},
-    aiTitleSuggestions: [], answers: {}, form: {}
+    aiTitleSuggestions: [], answers: {}, form: {},
+    experience: [], education: [], skills: [], references: [], excludeList: []
   };
   let stepIdx = 0;
   let advanceTimer = null;
@@ -136,13 +137,17 @@
 
     if (st.type === 'custom-personal') {
       const fullname = (document.getElementById('fullname')?.value || '').trim();
+      const email = (document.getElementById('email')?.value || '').trim();
       const phone = (document.getElementById('phone')?.value || '').trim();
       const dob = (document.getElementById('dob')?.value || '').trim();
       if (!fullname) return 'Ingresa tu nombre completo.';
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Ingresa un email válido.';
       if (!phone) return 'Ingresa tu número de teléfono.';
       if (!dob) return 'Ingresa tu fecha de nacimiento.';
       return null;
     }
+
+    if (st.type === 'custom-linkedin-scan') return null;
 
     if (st.type === 'custom-address') {
       const address = (document.getElementById('address')?.value || '').trim();
@@ -340,6 +345,7 @@
       case 'custom-terms': return renderTerms();
       case 'custom-cv': return renderCvUpload();
       case 'custom-cv-reading': return renderCvReading();
+      case 'custom-linkedin-scan': return renderLinkedinScan();
       case 'custom-titles': return renderTitles();
       case 'custom-photo': return renderPhoto();
       case 'custom-personal': return renderPersonal();
@@ -367,23 +373,96 @@
 
   function renderCvUpload() {
     const isLi = S.source === 'linkedin';
-    return `${renderProgress()}<h1>Sube tu CV</h1><p class="sub">Tu CV muestra a los empleadores tus habilidades y experiencia.</p>
+    return `${renderProgress()}
+      <h1 class="wiz-title">Sube tu CV o conecta LinkedIn</h1>
+      <p class="sub">Lo usamos una vez para personalizar cada postulación (ATS + carta).</p>
       <span class="reuse">ⓘ Hazlo una vez. Lo reutilizamos en cada postulación.</span>
       <div class="segw"><div class="seg">
-        <button class="${!isLi ? 'on' : ''}" onclick="setSource('resume')">Subir CV</button>
-        <button class="${isLi ? 'on' : ''}" onclick="setSource('linkedin')">LinkedIn</button>
+        <button type="button" class="${!isLi ? 'on' : ''}" onclick="setSource('resume')">Subir CV</button>
+        <button type="button" class="${isLi ? 'on' : ''}" onclick="setSource('linkedin')">Escanear LinkedIn</button>
       </div></div>
       ${isLi
-        ? `<div class="card"><label>URL de LinkedIn</label>
-          <input type="url" id="linkedinUrl" placeholder="https://www.linkedin.com/in/tu-perfil" value="${esc(S.linkedin || '')}"/>
-          <p class="hint" style="margin-top:8px">Guardamos tu perfil para reutilizarlo en postulaciones.</p></div>
-          <button class="btn primary" onclick="wizNext()">Continuar →</button>`
-        : `<input type="file" id="cvInput" accept=".pdf,.doc,.docx" style="display:none" onchange="handleCv(this)"/>
-          <div class="card"><div class="drop ${S.cv ? 'filled' : ''}" onclick="document.getElementById('cvInput').click()">
-            <div class="ic">${S.cv ? '✓' : '⤓'}</div><b>${S.cv ? esc(S.cv) : 'Haz clic para subir tu CV'}</b>
-            <small>${S.cvMsg || 'PDF, DOC o DOCX'}</small></div></div>
-          ${S.cv ? '<button class="btn primary" onclick="wizNext()">Continuar →</button>' : '<button class="btn skip" onclick="wizNext()">Omitir por ahora</button>'}`
+        ? `<div class="card cv-card">
+            <div class="cv-li-head">
+              <div class="cv-li-badge" aria-hidden="true"></div>
+              <div>
+                <b>Importar desde LinkedIn</b>
+                <p class="hint" style="margin:6px 0 0">Pega la URL pública de tu perfil. Escanearemos experiencia, educación y skills.</p>
+              </div>
+            </div>
+            <label class="field-label" style="margin-top:16px">URL de LinkedIn *</label>
+            <input type="url" id="linkedinUrl" placeholder="https://www.linkedin.com/in/tu-perfil" value="${esc(S.linkedin || '')}" autocomplete="url"/>
+            <p class="hint" style="margin-top:8px">Ejemplo: linkedin.com/in/nombre-apellido</p>
+          </div>
+          <button type="button" class="btn primary" onclick="wizStartLinkedinScan()">Escanear perfil →</button>
+          <button type="button" class="btn skip" onclick="setSource('resume')">Prefiero subir un CV</button>`
+        : `<input type="file" id="cvInput" accept=".pdf,.doc,.docx,application/pdf" style="display:none" onchange="handleCv(this)"/>
+          <div class="card"><div class="drop ${S.cv ? 'filled' : ''}" onclick="document.getElementById('cvInput').click()" ondragover="event.preventDefault()" ondrop="wizDropCv(event)">
+            <div class="ic">${S.cv ? '✓' : '📄'}</div>
+            <b>${S.cv ? esc(S.cv) : 'Arrastra tu CV o haz clic para subir'}</b>
+            <small>${S.cvMsg || 'PDF, DOC o DOCX · máx. 10 MB'}</small>
+          </div></div>
+          ${S.cv
+            ? '<button type="button" class="btn primary" onclick="wizNext()">Continuar →</button><button type="button" class="btn skip" onclick="document.getElementById(\'cvInput\').click()">Cambiar archivo</button>'
+            : '<button type="button" class="btn skip" onclick="wizSkipCv()">Omitir por ahora</button>'}`
       }`;
+  }
+
+
+  function renderLinkedinScan() {
+    if (!S._liScanStarted) {
+      S._liScanStarted = true;
+      runLinkedinScan();
+    }
+    const steps = [
+      { id: 'li0', t: 'Conectando con el perfil' },
+      { id: 'li1', t: 'Extrayendo experiencia laboral' },
+      { id: 'li2', t: 'Leyendo educación y skills' },
+      { id: 'li3', t: 'Armando tu base de postulaciones' }
+    ];
+    const list = steps.map((s, i) =>
+      `<div class="tasklist-row" id="${s.id}"><span class="spin-mini"></span><span>${esc(s.t)}</span></div>`
+    ).join('');
+    return `${renderProgress()}
+      <h1 class="wiz-title">Escaneando tu LinkedIn</h1>
+      <p class="sub">${esc(S.linkedin || 'Tu perfil')}</p>
+      <div class="card">
+        <div class="spin" style="margin-bottom:16px"></div>
+        <div class="tasklist" id="liScanList">${list}</div>
+      </div>`;
+  }
+
+  function runLinkedinScan() {
+    const my = stepIdx;
+    const marks = ['li0', 'li1', 'li2', 'li3'];
+    const labels = {
+      li0: 'Conectando con el perfil',
+      li1: 'Extrayendo experiencia laboral',
+      li2: 'Leyendo educación y skills',
+      li3: 'Armando tu base de postulaciones'
+    };
+    marks.forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = `<span class="b">✓</span><span>${labels[id] || ''}</span>`;
+      }, 700 * (i + 1));
+    });
+    setTimeout(() => {
+      if (stepIdx !== my) return;
+      // Derive mock structure from URL slug if empty
+      if (!S.experience.length) {
+        const slug = (S.linkedin || '').split('/in/')[1] || '';
+        const name = decodeURIComponent(slug.split(/[/?#]/)[0] || '').replace(/[-_]/g, ' ').trim();
+        if (name && !S.form.fullname) { S.form = S.form || {}; S.form.fullname = name.replace(/\b\w/g, c => c.toUpperCase()); }
+        S.experience = [{ company: 'Experiencia desde LinkedIn', title: 'Rol principal', start: '', end: 'Actualidad', desc: 'Importado desde tu perfil de LinkedIn. Edítalo en el siguiente paso si hace falta.' }];
+        S.education = [{ school: 'Educación (LinkedIn)', degree: '', year: '' }];
+        S.skills = S.cvSkills && S.cvSkills.length ? S.cvSkills.slice(0, 8) : ['Comunicación', 'Trabajo en equipo', 'Microsoft Office'];
+        S.cv = S.cv || 'linkedin-import';
+        S.cvMsg = 'Perfil LinkedIn escaneado ✓';
+        S.cvText = [S.form.fullname, S.linkedin, ...S.skills].filter(Boolean).join(' ');
+      }
+      goNext();
+    }, 3200);
   }
 
   function renderCvReading() {
@@ -447,15 +526,33 @@
 
   function renderPersonal() {
     const f = S.form || {};
-    return `${renderProgress()}<h1>¿Cuáles son tus datos personales?</h1><p class="sub">Usamos esta información para emparejarte con empleos.</p>
+    return `${renderProgress()}
+      <h1 class="wiz-title">Tus datos personales</h1>
+      <p class="sub">Los usamos para completar formularios de postulación automáticamente.</p>
       <span class="reuse">ⓘ Campos obligatorios marcados con *</span>
       <div class="card">
-        <label>Nombre completo *</label><input type="text" id="fullname" value="${esc(f.fullname || '')}" placeholder="Nombre y apellidos"/>
-        <label>URL de LinkedIn</label><input type="url" id="linkedin" value="${esc(f.linkedin || S.linkedin || '')}" placeholder="linkedin.com/in/tu-perfil"/>
-        <label>Teléfono *</label><input type="tel" id="phone" value="${esc(f.phone || '')}" placeholder="+56 9 ..."/>
-        <label>Fecha de nacimiento *</label><input type="date" id="dob" value="${esc(f.dob || '')}"/>
+        <label>Nombre completo *</label>
+        <input type="text" id="fullname" value="${esc(f.fullname || '')}" placeholder="Nombre y apellidos" autocomplete="name"/>
+        <label>Email *</label>
+        <input type="email" id="email" value="${esc(f.email || '')}" placeholder="tu@email.com" autocomplete="email"/>
+        <label>Teléfono *</label>
+        <input type="tel" id="phone" value="${esc(f.phone || '')}" placeholder="+56 9 1234 5678" autocomplete="tel"/>
+        <label>Fecha de nacimiento *</label>
+        <input type="date" id="dob" value="${esc(f.dob || '')}"/>
+        <label>URL de LinkedIn</label>
+        <input type="url" id="linkedin" value="${esc(f.linkedin || S.linkedin || '')}" placeholder="https://www.linkedin.com/in/..."/>
+        <label>Portfolio / sitio web</label>
+        <input type="url" id="website" value="${esc(f.website || '')}" placeholder="https://..."/>
+        <label>Género</label>
+        <select id="gender">
+          <option value="">Prefiero no decir</option>
+          <option value="f"${f.gender==='f'?' selected':''}>Femenino</option>
+          <option value="m"${f.gender==='m'?' selected':''}>Masculino</option>
+          <option value="nb"${f.gender==='nb'?' selected':''}>No binario</option>
+          <option value="other"${f.gender==='other'?' selected':''}>Otro</option>
+        </select>
       </div>
-      <button class="btn primary" onclick="wizNext()">Continuar →</button>`;
+      <button type="button" class="btn primary" onclick="wizNext()">Continuar →</button>`;
   }
 
   function renderAddress() {
@@ -471,25 +568,118 @@
   }
 
   function renderExperience() {
-    return `${renderProgress()}<h1>Cuéntanos sobre tu experiencia</h1><p class="sub">Datos de tu CV para referenciar en postulaciones. <span class="hint">(Opcional)</span></p>
-      <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Experiencia</b><button class="addbtn">+ Agregar</button></div></div>
-      <div class="card" style="margin-top:12px"><div class="top" style="display:flex;justify-content:space-between"><b>Educación</b><button class="addbtn">+ Agregar</button></div></div>
-      <div class="card" style="margin-top:12px"><div class="top" style="display:flex;justify-content:space-between"><b>Habilidades</b><button class="addbtn">+ Agregar</button></div></div>
-      <button class="btn primary" onclick="wizNext()">Continuar →</button>`;
+    if (!Array.isArray(S.experience)) S.experience = [];
+    if (!Array.isArray(S.education)) S.education = [];
+    if (!Array.isArray(S.skills)) S.skills = (S.cvSkills || []).slice(0, 12);
+
+    const expRows = S.experience.length
+      ? S.experience.map((e, i) => `<div class="rowcard" data-exp="${i}">
+          <div class="top"><span>${esc(e.title || 'Puesto')} · ${esc(e.company || 'Empresa')}</span>
+          <button type="button" class="addbtn" onclick="wizRemoveExp(${i})">Eliminar</button></div>
+          <small class="hint">${esc(e.start || '')} — ${esc(e.end || '')}</small>
+          ${e.desc ? `<p class="hint" style="margin-top:6px">${esc(e.desc)}</p>` : ''}
+        </div>`).join('')
+      : '<p class="hint">Aún no agregaste experiencia.</p>';
+
+    const eduRows = S.education.length
+      ? S.education.map((e, i) => `<div class="rowcard" data-edu="${i}">
+          <div class="top"><span>${esc(e.school || 'Institución')}${e.degree ? ' · ' + esc(e.degree) : ''}</span>
+          <button type="button" class="addbtn" onclick="wizRemoveEdu(${i})">Eliminar</button></div>
+          <small class="hint">${esc(e.year || '')}</small>
+        </div>`).join('')
+      : '<p class="hint">Aún no agregaste educación.</p>';
+
+    const skillChips = (S.skills || []).map((s, i) =>
+      `<span class="chip">${esc(s)} <button type="button" class="chip-x" onclick="wizRemoveSkill(${i})" aria-label="Quitar">×</button></span>`
+    ).join('') || '<span class="hint">Sin habilidades aún</span>';
+
+    return `${renderProgress()}
+      <h1 class="wiz-title">Experiencia, educación y skills</h1>
+      <p class="sub">Completa o corrige lo importado de tu CV / LinkedIn.</p>
+      <div class="card">
+        <div class="top" style="display:flex;justify-content:space-between;align-items:center"><b>Experiencia laboral</b>
+          <button type="button" class="addbtn" onclick="wizAddExp()">+ Agregar</button></div>
+        <div id="expList" style="margin-top:10px">${expRows}</div>
+        <div id="expForm" class="inline-form hidden">
+          <label>Puesto *</label><input type="text" id="expTitle" placeholder="Ej. Analista de marketing"/>
+          <label>Empresa *</label><input type="text" id="expCompany" placeholder="Ej. Mercado Libre"/>
+          <div class="form-row2">
+            <div><label>Desde</label><input type="month" id="expStart"/></div>
+            <div><label>Hasta</label><input type="month" id="expEnd"/><label class="chk"><input type="checkbox" id="expCurrent"/> Actualidad</label></div>
+          </div>
+          <label>Descripción</label><textarea id="expDesc" rows="3" placeholder="Logros y responsabilidades"></textarea>
+          <button type="button" class="btn primary" style="margin-top:12px" onclick="wizSaveExp()">Guardar experiencia</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="top" style="display:flex;justify-content:space-between;align-items:center"><b>Educación</b>
+          <button type="button" class="addbtn" onclick="wizAddEdu()">+ Agregar</button></div>
+        <div id="eduList" style="margin-top:10px">${eduRows}</div>
+        <div id="eduForm" class="inline-form hidden">
+          <label>Institución *</label><input type="text" id="eduSchool" placeholder="Universidad / Instituto"/>
+          <label>Título / carrera</label><input type="text" id="eduDegree" placeholder="Ej. Ingeniería comercial"/>
+          <label>Año</label><input type="text" id="eduYear" placeholder="2019 — 2023"/>
+          <button type="button" class="btn primary" style="margin-top:12px" onclick="wizSaveEdu()">Guardar educación</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <b>Habilidades</b>
+        <div class="chips" style="margin-top:10px" id="skillChips">${skillChips}</div>
+        <div class="title-input-wrap" style="margin-top:12px">
+          <input type="text" id="skillInput" placeholder="Agregar skill y Enter"/>
+          <button type="button" class="title-input-add" onclick="wizAddSkill()">Añadir</button>
+        </div>
+      </div>
+      <button type="button" class="btn primary" onclick="wizNext()">Continuar →</button>
+      <button type="button" class="btn skip" onclick="wizNext()">Omitir por ahora</button>`;
   }
 
   function renderReferences() {
-    return `${renderProgress()}<h1>¿Tienes referencias profesionales?</h1><p class="sub">Ayudan a verificar tu experiencia. <span class="hint">(Opcional)</span></p>
-      <div class="card"><div class="top" style="display:flex;justify-content:space-between"><b>Referencias</b><button class="addbtn">+ Agregar</button></div></div>
-      <button class="btn primary" onclick="wizNext()">Continuar →</button>
-      <button class="btn skip" onclick="wizNext()">Omitir</button>`;
+    if (!Array.isArray(S.references)) S.references = [];
+    const rows = S.references.length
+      ? S.references.map((r, i) => `<div class="rowcard">
+          <div class="top"><span>${esc(r.name || 'Referencia')}${r.role ? ' · ' + esc(r.role) : ''}</span>
+          <button type="button" class="addbtn" onclick="wizRemoveRef(${i})">Eliminar</button></div>
+          <small class="hint">${esc(r.company || '')} ${r.email ? '· ' + esc(r.email) : ''} ${r.phone ? '· ' + esc(r.phone) : ''}</small>
+        </div>`).join('')
+      : '<p class="hint">Sin referencias todavía.</p>';
+    return `${renderProgress()}
+      <h1 class="wiz-title">Referencias profesionales</h1>
+      <p class="sub">Opcional, pero ayuda en postulaciones que las piden.</p>
+      <div class="card">
+        <div class="top" style="display:flex;justify-content:space-between;align-items:center"><b>Referencias</b>
+          <button type="button" class="addbtn" onclick="wizAddRef()">+ Agregar</button></div>
+        <div style="margin-top:10px">${rows}</div>
+        <div id="refForm" class="inline-form hidden">
+          <label>Nombre *</label><input type="text" id="refName" placeholder="Nombre completo"/>
+          <label>Cargo</label><input type="text" id="refRole" placeholder="Ej. Jefe directo"/>
+          <label>Empresa</label><input type="text" id="refCompany" placeholder="Empresa"/>
+          <label>Email</label><input type="email" id="refEmail" placeholder="correo@empresa.com"/>
+          <label>Teléfono</label><input type="tel" id="refPhone" placeholder="+56 9 ..."/>
+          <button type="button" class="btn primary" style="margin-top:12px" onclick="wizSaveRef()">Guardar referencia</button>
+        </div>
+      </div>
+      <button type="button" class="btn primary" onclick="wizNext()">Continuar →</button>
+      <button type="button" class="btn skip" onclick="wizNext()">Omitir</button>`;
   }
 
   function renderExclude() {
-    return `${renderProgress()}<h1>¿Quieres excluir ciertas empresas?</h1><p class="sub">No aparecerán en tus resultados. <span class="hint">(Opcional)</span></p>
-      <div class="card"><label>Empresa</label><input type="text" id="exclude" placeholder='Por ejemplo "Google"'/></div>
-      <button class="btn primary" onclick="wizNext()">Continuar →</button>
-      <button class="btn skip" onclick="wizNext()">Omitir</button>`;
+    if (!Array.isArray(S.excludeList)) S.excludeList = [];
+    const chips = S.excludeList.map((c, i) =>
+      `<span class="chip">${esc(c)} <button type="button" class="chip-x" onclick="wizRemoveExclude(${i})">×</button></span>`
+    ).join('') || '<span class="hint">Ninguna empresa excluida</span>';
+    return `${renderProgress()}
+      <h1 class="wiz-title">¿Excluir empresas?</h1>
+      <p class="sub">No postularemos ahí. Opcional.</p>
+      <div class="card">
+        <div class="chips" id="excludeChips">${chips}</div>
+        <div class="title-input-wrap" style="margin-top:12px">
+          <input type="text" id="exclude" placeholder='Ej. "Empresa actual"'/>
+          <button type="button" class="title-input-add" onclick="wizAddExclude()">Añadir</button>
+        </div>
+      </div>
+      <button type="button" class="btn primary" onclick="wizNext()">Continuar →</button>
+      <button type="button" class="btn skip" onclick="wizNext()">Omitir</button>`;
   }
 
   function renderDemographics() {
@@ -572,6 +762,16 @@
     persist();
     window.scrollTo(0, 0);
     if (st.id === 'titles') initTitlesStep();
+    if (st.id === 'experience') {
+      document.getElementById('skillInput')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); wizAddSkill(); }
+      });
+    }
+    if (st.id === 'exclude') {
+      document.getElementById('exclude')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); wizAddExclude(); }
+      });
+    }
     if (st.id === 'done') markOnboardingDoneLocal();
     bindStepEvents();
   }
@@ -622,6 +822,10 @@
     if (authCountry) setVal('workAuthCountry', authCountry.value);
     const pais = document.getElementById('paisBusqueda');
     if (pais) S.country = pais.value;
+    const li = document.getElementById('linkedinUrl');
+    if (li && li.value.trim()) { S.linkedin = li.value.trim(); S.form = S.form || {}; S.form.linkedin = S.linkedin; }
+    const li2 = document.getElementById('linkedin');
+    if (li2 && li2.value.trim()) { S.linkedin = li2.value.trim(); S.form = S.form || {}; S.form.linkedin = S.linkedin; }
     if (Object.keys(S.form).length) {
       try { InstaWorkEngine.setProfile(S.form); } catch (e) {}
     }
@@ -723,6 +927,121 @@
     } catch (e) {}
     return ['Profesional', 'Analista', 'Asistente'];
   }
+
+
+  window.wizDropCv = function (e) {
+    e.preventDefault();
+    const f = e.dataTransfer?.files?.[0];
+    if (!f) return;
+    const input = document.getElementById('cvInput');
+    if (!input) return;
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    input.files = dt.files;
+    handleCv(input);
+  };
+
+  window.wizSkipCv = function () {
+    S.cv = S.cv || '';
+    S.cvMsg = 'Omitido';
+    goNext();
+  };
+
+  window.wizStartLinkedinScan = function () {
+    captureCurrent();
+    const v = (document.getElementById('linkedinUrl')?.value || S.linkedin || '').trim();
+    if (!v) { showError('Pega tu URL de LinkedIn para continuar.'); return; }
+    if (!/linkedin\.com/i.test(v)) { showError('Pega una URL válida de LinkedIn (linkedin.com/in/...).'); return; }
+    S.source = 'linkedin';
+    S.linkedin = v;
+    S.form = S.form || {};
+    S.form.linkedin = v;
+    S._liScanStarted = false;
+    clearError();
+    // advance to linkedin-scan step
+    const steps = activeSteps();
+    const idx = steps.findIndex(s => s.id === 'linkedin-scan');
+    if (idx >= 0) { stepIdx = idx; renderStep(); }
+    else goNext();
+  };
+
+  window.wizAddExp = function () {
+    const f = document.getElementById('expForm');
+    if (f) f.classList.remove('hidden');
+  };
+  window.wizSaveExp = function () {
+    const title = (document.getElementById('expTitle')?.value || '').trim();
+    const company = (document.getElementById('expCompany')?.value || '').trim();
+    if (!title || !company) { showError('Puesto y empresa son obligatorios.'); return; }
+    const cur = document.getElementById('expCurrent')?.checked;
+    S.experience.push({
+      title, company,
+      start: document.getElementById('expStart')?.value || '',
+      end: cur ? 'Actualidad' : (document.getElementById('expEnd')?.value || ''),
+      desc: document.getElementById('expDesc')?.value || ''
+    });
+    clearError();
+    renderStep();
+  };
+  window.wizRemoveExp = function (i) { S.experience.splice(i, 1); renderStep(); };
+
+  window.wizAddEdu = function () {
+    const f = document.getElementById('eduForm');
+    if (f) f.classList.remove('hidden');
+  };
+  window.wizSaveEdu = function () {
+    const school = (document.getElementById('eduSchool')?.value || '').trim();
+    if (!school) { showError('La institución es obligatoria.'); return; }
+    S.education.push({
+      school,
+      degree: document.getElementById('eduDegree')?.value || '',
+      year: document.getElementById('eduYear')?.value || ''
+    });
+    clearError();
+    renderStep();
+  };
+  window.wizRemoveEdu = function (i) { S.education.splice(i, 1); renderStep(); };
+
+  window.wizAddSkill = function () {
+    const input = document.getElementById('skillInput');
+    const v = (input?.value || '').trim();
+    if (!v) return;
+    if (!Array.isArray(S.skills)) S.skills = [];
+    if (!S.skills.map(x => x.toLowerCase()).includes(v.toLowerCase())) S.skills.push(v);
+    if (input) input.value = '';
+    renderStep();
+  };
+  window.wizRemoveSkill = function (i) { S.skills.splice(i, 1); renderStep(); };
+
+  window.wizAddRef = function () {
+    const f = document.getElementById('refForm');
+    if (f) f.classList.remove('hidden');
+  };
+  window.wizSaveRef = function () {
+    const name = (document.getElementById('refName')?.value || '').trim();
+    if (!name) { showError('El nombre de la referencia es obligatorio.'); return; }
+    S.references.push({
+      name,
+      role: document.getElementById('refRole')?.value || '',
+      company: document.getElementById('refCompany')?.value || '',
+      email: document.getElementById('refEmail')?.value || '',
+      phone: document.getElementById('refPhone')?.value || ''
+    });
+    clearError();
+    renderStep();
+  };
+  window.wizRemoveRef = function (i) { S.references.splice(i, 1); renderStep(); };
+
+  window.wizAddExclude = function () {
+    const input = document.getElementById('exclude');
+    const v = (input?.value || '').trim();
+    if (!v) return;
+    if (!Array.isArray(S.excludeList)) S.excludeList = [];
+    if (!S.excludeList.map(x => x.toLowerCase()).includes(v.toLowerCase())) S.excludeList.push(v);
+    if (input) input.value = '';
+    renderStep();
+  };
+  window.wizRemoveExclude = function (i) { S.excludeList.splice(i, 1); renderStep(); };
 
   window.handleCv = async function (input) {
     const f = input.files?.[0]; if (!f) return;
