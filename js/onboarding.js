@@ -527,20 +527,36 @@
   }
 
   function renderCvReading() {
+    if (S.cvSkipped && !S.cv && !S.cvText) {
+      setTimeout(() => { if (currentStep()?.id === 'cv-reading') goNext(); }, 50);
+      return `${renderProgress()}<h1 class="wiz-title">Continuando…</h1>`;
+    }
     if (S.cvText && window.InstaWorkAnalyzer) {
       try {
         const a = window.InstaWorkAnalyzer.analyze(S.cvText);
         S.cvSkills = a.skills; S.cvArea = a.areaLabel; S.cvRoles = a.titles;
+        if (!S.skills?.length) S.skills = (a.skills || []).slice(0, 12);
+        if (!S.titles.length && a.titles?.length) S.titles = a.titles.slice(0, 4);
       } catch (e) {}
     }
-    setTimeout(() => { if (currentStep()?.id === 'cv-reading') goNext(); }, 5000);
+    const delay = (S.cvSkills && S.cvSkills.length) ? 2800 : 1600;
+    setTimeout(() => { if (currentStep()?.id === 'cv-reading') goNext(); }, delay);
     const sk = S.cvSkills || [];
     const body = sk.length
       ? `<b>Detectamos ${sk.length} habilidades${S.cvArea ? ' · Área: ' + esc(S.cvArea) : ''}:</b>
          <div class="chips" style="margin-top:8px">${sk.slice(0, 14).map(s => `<span class="chip">${esc(s)}</span>`).join('')}</div>`
-      : (S.cv ? '<b>CV recibido.</b><p class="hint">No pudimos extraer habilidades (puede ser PDF escaneado).</p>' : '<b>Sin CV.</b>');
-    return `${renderProgress()}<h1>Leyendo tu CV</h1><p class="sub">Extraemos información clave para priorizar tus postulaciones.</p>
-      <div class="spin"></div><div class="card">${body}</div>`;
+      : (S.cv
+          ? '<b>CV recibido.</b><p class="hint">Extraeremos más detalle al generar tu kit. Puedes editar skills más adelante.</p>'
+          : (S.linkedin
+              ? '<b>Perfil LinkedIn listo.</b><p class="hint">Usaremos tu URL para personalizar postulaciones.</p>'
+              : '<b>Sin archivo.</b><p class="hint">Puedes cargar un CV después desde el tablero.</p>'));
+    return `${renderProgress()}
+      <h1 class="wiz-title">Analizando tu perfil</h1>
+      <p class="sub">Un momento mientras preparamos tu base de postulaciones…</p>
+      <div class="card">
+        <div class="spin" style="margin-bottom:14px"></div>
+        ${body}
+      </div>`;
   }
 
   function renderTitles() {
@@ -1000,22 +1016,58 @@
 
   function syncPrefsToEngine() {
     try {
+      const a = S.answers || {};
       InstaWorkEngine.setPreferences({
         titles: S.titles,
-        country: S.country || 'Chile',
-        remote: (S.answers.workFormat || []).includes('remote'),
-        skills: S.cvSkills || [],
-        minSalary: S.answers.minSalary,
-        workTypes: S.answers.workTypes,
-        workFormat: S.answers.workFormat,
-        benefits: S.answers.benefits,
-        companySize: S.answers.companySize,
-        teamSize: S.answers.teamSize,
-        education: S.answers.education,
-        expYears: S.answers.expYears,
-        profLevel: S.answers.profLevel
+        country: S.country || S.form?.pais || 'Chile',
+        remote: (a.workFormat || []).includes('remote'),
+        skills: S.skills?.length ? S.skills : (S.cvSkills || []),
+        minSalary: a.minSalary,
+        workTypes: a.workTypes,
+        workFormat: a.workFormat,
+        benefits: a.benefits,
+        companySize: a.companySize,
+        teamSize: a.teamSize,
+        education: a.education,
+        expYears: a.expYears,
+        profLevel: a.profLevel,
+        goals: a.goals,
+        schedule: a.schedule,
+        servicePath: a.servicePath,
+        remoteLocations: a.remoteLocations,
+        onsiteLocations: a.onsiteLocations,
+        workAuth: a.workAuth,
+        workAuthCountry: a.workAuthCountry || 'Chile',
+        excludeCompanies: S.excludeList || [],
+        mode: S.mode,
+        source: S.source
       });
-      InstaWorkEngine.setProfile({ onboarding: S.answers, cvSkills: S.cvSkills });
+      const profile = Object.assign({}, S.form || {}, {
+        linkedin: S.linkedin || S.form?.linkedin || '',
+        cvName: S.cv || '',
+        photoName: S.photo || '',
+        experience: S.experience || [],
+        educationHistory: S.education || [],
+        skills: S.skills?.length ? S.skills : (S.cvSkills || []),
+        references: S.references || [],
+        inboxAlias: S.form?.inboxAlias || '',
+        onboardingComplete: false
+      });
+      InstaWorkEngine.setProfile(profile);
+      try {
+        localStorage.setItem('instawork_onboarding_answers', JSON.stringify({
+          answers: a,
+          titles: S.titles,
+          mode: S.mode,
+          experience: S.experience,
+          education: S.education,
+          skills: S.skills,
+          excludeList: S.excludeList,
+          form: S.form,
+          linkedin: S.linkedin,
+          savedAt: Date.now()
+        }));
+      } catch (e2) {}
     } catch (e) {}
   }
 
@@ -1275,11 +1327,13 @@
 
   function markOnboardingDoneLocal() {
     try {
+      syncPrefsToEngine();
       let uid = sessionStorage.getItem('instawork_uid') || InstaWorkEngine.getProfile()?.uid;
       if (uid) localStorage.setItem('instawork_done_' + uid, '1');
       localStorage.setItem('instawork_done', '1');
       const w = JSON.parse(localStorage.getItem('instawork_wizard') || '{}');
       w.completed = true; localStorage.setItem('instawork_wizard', JSON.stringify(w));
+      try { InstaWorkEngine.setProfile({ onboardingComplete: true }); } catch (e2) {}
     } catch (e) {}
   }
 

@@ -35,7 +35,7 @@
     { id: 'linkedin-scan', section: 'resume', type: 'custom-linkedin-scan',
       show: (S) => S.source === 'linkedin' },
     { id: 'cv-reading', section: 'resume', type: 'custom-cv-reading',
-      show: (S) => S.source !== 'linkedin' || !!S.linkedin },
+      show: (S) => !S.cvSkipped && !!(S.cv || S.cvText || (S.source === 'linkedin' && S.linkedin)) },
 
     /* ── SITUACIÓN ACTUAL ── */
     {
