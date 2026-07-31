@@ -117,7 +117,18 @@
     if (st.type === 'info' || st.type === 'matching' || st.type === 'custom-generating' || st.type === 'custom-done') return null;
     if (st.type === 'custom-cv-reading') return null;
 
-    if (st.type === 'custom-terms') return null;
+    if (st.type === 'custom-terms') {
+      const accepted = document.getElementById('termsAccepted')?.checked || (S.form && S.form.termsAccepted);
+      if (!accepted) return 'Debes aceptar los términos para continuar.';
+      return null;
+    }
+
+    if (st.type === 'custom-inbox') {
+      const a = (document.getElementById('inboxAlias')?.value || '').trim();
+      if (!a || a.length < 3) return 'Elige un alias de al menos 3 caracteres.';
+      if (!/^[a-zA-Z0-9._-]+$/.test(a)) return 'El alias solo puede tener letras, números, punto, guion o guion bajo.';
+      return null;
+    }
 
     if (st.type === 'custom-cv') {
       if (!S.cv && S.source === 'resume') return 'Sube tu CV o haz clic en "Omitir por ahora" para continuar.';
@@ -363,12 +374,27 @@
   }
 
   function renderTerms() {
-    return `${renderProgress()}<h1>Antes de continuar, revisa estos términos</h1>
-      <div class="card"><b>instaWork — Acuerdo de Usuario y Términos de Auto-Apply</b>
-      <p class="hint">Versión: v1.0 · Actualizado: hoy<br>Al continuar, confirmas que has leído, entendido y aceptas este Acuerdo.</p>
-      <p style="font-size:13px"><b>1. Alcance.</b> Auto-Apply encuentra vacantes en plataformas de terceros y redacta postulaciones usando IA según tus instrucciones.</p>
-      <p style="font-size:13px"><b>2. Límites.</b> Operamos con mejor esfuerzo. No garantizamos entrevistas ni ofertas.</p></div>
-      <button class="btn primary" onclick="wizNext()">Continuar a Auto Apply</button>`;
+    const ok = !!(S.form && S.form.termsAccepted);
+    return `${renderProgress()}
+      <h1 class="wiz-title">Términos de Auto-Apply</h1>
+      <p class="sub">Revisa y acepta para activar postulaciones automáticas.</p>
+      <div class="card terms-card" style="text-align:left">
+        <b>instaWork — Acuerdo de Usuario y Auto-Apply</b>
+        <p class="hint">Versión 1.1</p>
+        <div class="terms-scroll">
+          <p><b>1. Alcance.</b> Auto-Apply busca vacantes en portales de terceros y completa postulaciones usando tu perfil, CV y preferencias.</p>
+          <p><b>2. Autorización.</b> Nos autorizas a enviar postulaciones en tu nombre según el modo elegido (Auto, Híbrido o Revisión).</p>
+          <p><b>3. Exactitud.</b> Eres responsable de que tu CV, datos y respuestas sean verídicos. Puedes editarlos cuando quieras.</p>
+          <p><b>4. Límites.</b> No garantizamos entrevistas, ofertas ni respuestas de empleadores. El servicio es de mejor esfuerzo.</p>
+          <p><b>5. Datos.</b> Tratamos tu información para operar el producto. Puedes pedir exportación o eliminación escribiendo a soporte.</p>
+          <p><b>6. Terceros.</b> Los sitios de empleo tienen sus propias reglas; el rechazo o bloqueo de una plataforma está fuera de nuestro control.</p>
+        </div>
+        <label class="chk terms-check">
+          <input type="checkbox" id="termsAccepted" ${ok?'checked':''}/>
+          He leído y acepto los Términos y la Política de Privacidad *
+        </label>
+      </div>
+      <button type="button" class="btn primary" onclick="wizNext()">Continuar a Auto-Apply</button>`;
   }
 
   function renderCvUpload() {
@@ -516,12 +542,24 @@
   }
 
   function renderPhoto() {
-    return `${renderProgress()}<h1>Sube una foto de perfil</h1><p class="sub">Algunas postulaciones pueden pedir una foto. PNG, JPG o JPEG.</p>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
-      <div class="card"><div class="drop ${S.photo ? 'filled' : ''}" onclick="document.getElementById('photoInput').click()">
-        <div class="ic">${S.photo ? '✓' : '👤'}</div><b>${S.photo ? esc(S.photo) : 'Haz clic para subir'}</b></div></div>
-      <button class="btn primary" onclick="wizNext()">Continuar →</button>
-      <button class="btn skip" onclick="wizNext()">Omitir</button>`;
+    const preview = S.photoDataUrl
+      ? `<img class="photo-preview" src="${S.photoDataUrl}" alt="Vista previa"/>`
+      : `<div class="ic">${S.photo ? '✓' : '👤'}</div>`;
+    return `${renderProgress()}
+      <h1 class="wiz-title">Foto de perfil</h1>
+      <p class="sub">Algunas postulaciones la piden. PNG o JPG, fondo simple funciona mejor.</p>
+      <input type="file" id="photoInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="handlePhoto(this)"/>
+      <div class="card">
+        <div class="drop ${S.photo ? 'filled' : ''}" onclick="document.getElementById('photoInput').click()">
+          ${preview}
+          <b>${S.photo ? esc(S.photo) : 'Haz clic para subir una foto'}</b>
+          <small>${S.photo ? 'Toca para cambiar' : 'PNG, JPG o WEBP'}</small>
+        </div>
+      </div>
+      ${S.photo
+        ? '<button type="button" class="btn primary" onclick="wizNext()">Continuar →</button><button type="button" class="btn skip" onclick="wizClearPhoto()">Quitar foto</button>'
+        : '<button type="button" class="btn skip" onclick="wizNext()">Omitir por ahora</button>'}
+      ${S.photo ? '' : '<button type="button" class="btn primary" onclick="document.getElementById(\'photoInput\').click()">Elegir archivo</button>'}`;
   }
 
   function renderPersonal() {
@@ -557,14 +595,38 @@
 
   function renderAddress() {
     const f = S.form || {};
-    return `${renderProgress()}<h1>¿Dónde vives?</h1><p class="sub">Tu dirección de residencia, requerida para postulaciones.</p>
-      <div class="card">
-        <label>Dirección *</label><input type="text" id="address" value="${esc(f.address || '')}" placeholder="Calle y número"/>
-        <label>Ciudad *</label><input type="text" id="city" value="${esc(f.city || '')}" placeholder="Ciudad"/>
-        <label>País</label><select id="pais"><option>Chile</option><option>Argentina</option><option>Perú</option><option>Colombia</option><option>México</option></select>
-        <label>Código postal *</label><input type="text" id="zip" value="${esc(f.zip || '')}" placeholder="8320000"/>
+    const countries = ['Chile','Argentina','Perú','Colombia','México','España','Estados Unidos','Otro'];
+    const opts = countries.map(c => `<option value="${esc(c)}"${(f.pais||'Chile')===c?' selected':''}>${esc(c)}</option>`).join('');
+    return `${renderProgress()}
+      <h1 class="wiz-title">¿Dónde vives?</h1>
+      <p class="sub">Dirección de residencia para formularios de postulación.</p>
+      <div class="card" style="text-align:left">
+        <label>Dirección (calle y número) *</label>
+        <input type="text" id="address" value="${esc(f.address || '')}" placeholder="Av. Ejemplo 123" autocomplete="street-address"/>
+        <label>Depto / oficina / casa</label>
+        <input type="text" id="address2" value="${esc(f.address2 || '')}" placeholder="Depto 4B (opcional)"/>
+        <div class="form-row2">
+          <div>
+            <label>Ciudad *</label>
+            <input type="text" id="city" value="${esc(f.city || '')}" placeholder="Santiago" autocomplete="address-level2"/>
+          </div>
+          <div>
+            <label>Comuna / región</label>
+            <input type="text" id="region" value="${esc(f.region || '')}" placeholder="Providencia" autocomplete="address-level1"/>
+          </div>
+        </div>
+        <div class="form-row2">
+          <div>
+            <label>País</label>
+            <select id="pais">${opts}</select>
+          </div>
+          <div>
+            <label>Código postal *</label>
+            <input type="text" id="zip" value="${esc(f.zip || '')}" placeholder="8320000" autocomplete="postal-code"/>
+          </div>
+        </div>
       </div>
-      <button class="btn primary" onclick="wizNext()">Continuar →</button>`;
+      <button type="button" class="btn primary" onclick="wizNext()">Continuar →</button>`;
   }
 
   function renderExperience() {
@@ -683,33 +745,95 @@
   }
 
   function renderDemographics() {
-    return `${renderProgress()}<h1>Cuéntanos sobre ti</h1><p class="sub">Para promover contratación inclusiva. <span class="hint">(Opcional)</span></p>
-      <div class="card">
-        <label>Raza o etnia</label><select id="etnia"><option>Prefiero no decir</option><option>Latino/Hispano</option><option>Mestizo</option><option>Blanco</option><option>Afrodescendiente</option><option>Indígena</option><option>Asiático</option><option>Otra</option></select>
-        <label>Nacionalidad</label><select id="nacionalidad"><option>Prefiero no decir</option><option>Chilena</option><option>Argentina</option><option>Peruana</option><option>Colombia</option><option>Mexicana</option><option>Otra</option></select>
+    const f = S.form || {};
+    const sel = (id, val, options) => {
+      const opts = options.map(([v,l]) => `<option value="${esc(v)}"${val===v?' selected':''}>${esc(l)}</option>`).join('');
+      return `<label>${esc(id)}</label><select id="${esc(id)}">${opts}</select>`;
+    };
+    // simpler explicit
+    return `${renderProgress()}
+      <h1 class="wiz-title">Datos demográficos</h1>
+      <p class="sub">Opcional. Ayuda a empleadores con contratación inclusiva; puedes omitir.</p>
+      <div class="card" style="text-align:left">
+        <label>Raza o etnia</label>
+        <select id="etnia">
+          <option value=""${!f.etnia?' selected':''}>Prefiero no decir</option>
+          <option value="latino"${f.etnia==='latino'?' selected':''}>Latino/Hispano</option>
+          <option value="mestizo"${f.etnia==='mestizo'?' selected':''}>Mestizo</option>
+          <option value="blanco"${f.etnia==='blanco'?' selected':''}>Blanco</option>
+          <option value="afro"${f.etnia==='afro'?' selected':''}>Afrodescendiente</option>
+          <option value="indigena"${f.etnia==='indigena'?' selected':''}>Indígena</option>
+          <option value="asiatico"${f.etnia==='asiatico'?' selected':''}>Asiático</option>
+          <option value="otra"${f.etnia==='otra'?' selected':''}>Otra</option>
+        </select>
+        <label>Nacionalidad</label>
+        <select id="nacionalidad">
+          <option value=""${!f.nacionalidad?' selected':''}>Prefiero no decir</option>
+          <option value="cl"${f.nacionalidad==='cl'?' selected':''}>Chilena</option>
+          <option value="ar"${f.nacionalidad==='ar'?' selected':''}>Argentina</option>
+          <option value="pe"${f.nacionalidad==='pe'?' selected':''}>Peruana</option>
+          <option value="co"${f.nacionalidad==='co'?' selected':''}>Colombiana</option>
+          <option value="mx"${f.nacionalidad==='mx'?' selected':''}>Mexicana</option>
+          <option value="otra"${f.nacionalidad==='otra'?' selected':''}>Otra</option>
+        </select>
+        <label>¿Tienes alguna discapacidad?</label>
+        <select id="disability">
+          <option value=""${!f.disability?' selected':''}>Prefiero no decir</option>
+          <option value="no"${f.disability==='no'?' selected':''}>No</option>
+          <option value="yes"${f.disability==='yes'?' selected':''}>Sí</option>
+        </select>
+        <label>¿Requieres ajuste razonable en el trabajo?</label>
+        <select id="accommodation">
+          <option value=""${!f.accommodation?' selected':''}>Prefiero no decir</option>
+          <option value="no"${f.accommodation==='no'?' selected':''}>No</option>
+          <option value="yes"${f.accommodation==='yes'?' selected':''}>Sí</option>
+        </select>
       </div>
-      <button class="btn primary" onclick="wizNext()">Continuar →</button>`;
+      <button type="button" class="btn primary" onclick="wizNext()">Continuar →</button>
+      <button type="button" class="btn skip" onclick="wizNext()">Omitir</button>`;
   }
 
   function renderInbox() {
-    return `${renderProgress()}<h1>Crea tu bandeja de Auto Apply</h1><p class="sub">Gestiona tu búsqueda sin saturar tu correo personal.</p>
+    const f = S.form || {};
+    const alias = f.inboxAlias || (f.email ? String(f.email).split('@')[0] : '') || 'candidato';
+    return `${renderProgress()}
+      <h1 class="wiz-title">Crea tu bandeja Auto-Apply</h1>
+      <p class="sub">Centraliza respuestas de empleadores sin saturar tu correo personal.</p>
       <div class="tiles">
-        <div class="tile"><div class="ic">🛡</div><b>Anti-spam</b></div>
-        <div class="tile"><div class="ic">▤</div><b>Auto-orden</b></div>
-        <div class="tile"><div class="ic">🤖</div><b>Sin manos</b></div>
-        <div class="tile"><div class="ic">🔔</div><b>Notificado</b></div>
+        <div class="tile"><div class="ic">🛡</div><b>Anti-spam</b><small>Filtro de ruido</small></div>
+        <div class="tile"><div class="ic">▤</div><b>Auto-orden</b><small>Por empresa</small></div>
+        <div class="tile"><div class="ic">🤖</div><b>Sin manos</b><small>IA clasifica</small></div>
+        <div class="tile"><div class="ic">🔔</div><b>Alertas</b><small>Solo lo importante</small></div>
       </div>
-      <button class="btn primary" onclick="wizNext()">Guardar y continuar</button>`;
+      <div class="card" style="margin-top:16px;text-align:left">
+        <label>Tu alias de postulaciones *</label>
+        <div class="inbox-alias">
+          <input type="text" id="inboxAlias" value="${esc(alias)}" placeholder="tu.nombre" autocomplete="off"/>
+          <span class="inbox-domain">@instawork.mail</span>
+        </div>
+        <p class="hint" style="margin-top:8px">Las respuestas de reclutadores llegarán aquí y te avisaremos.</p>
+        <label class="chk" style="margin-top:14px">
+          <input type="checkbox" id="inboxForward" ${f.inboxForward!==false?'checked':''}/>
+          Reenviar copias a mi email personal
+        </label>
+        <label class="chk">
+          <input type="checkbox" id="inboxNotify" ${f.inboxNotify!==false?'checked':''}/>
+          Notificarme de respuestas y entrevistas
+        </label>
+      </div>
+      <button type="button" class="btn primary" onclick="wizNext()">Guardar y continuar</button>`;
   }
 
   function renderMode() {
-    return `${renderProgress()}<h1>¿Cómo debemos postular por ti?</h1>
-      <div class="card">
-        ${modeCard('hybrid', 'Modo Híbrido', 'Lo mejor de ambos', 'Auto-postulamos a roles de alto match (75%+). Tú decides el resto.')}
-        ${modeCard('auto', 'Modo Auto', 'Ahorra tiempo', 'Totalmente automático. Máxima velocidad.')}
-        ${modeCard('review', 'Modo Revisión', 'Aprueba cada empleo', 'Nada se envía sin tu aprobación.')}
+    return `${renderProgress()}
+      <h1 class="wiz-title">¿Cómo debemos postular por ti?</h1>
+      <p class="sub">Puedes cambiar el modo después en el tablero.</p>
+      <div class="mode-list">
+        ${modeCard('hybrid', 'Modo Híbrido', 'Recomendado', 'Auto-postulamos roles con alto match (75%+). Tú decides el resto.')}
+        ${modeCard('auto', 'Modo Auto', 'Máxima velocidad', 'Totalmente automático según tus filtros. Ideal si quieres volumen.')}
+        ${modeCard('review', 'Modo Revisión', 'Control total', 'Nada se envía sin tu aprobación explícita.')}
       </div>
-      <button class="btn primary" onclick="wizGenKit()">Continuar →</button>`;
+      <button type="button" class="btn primary" onclick="wizGenKit()">Activar y continuar →</button>`;
   }
 
   function renderGenerating() {
@@ -826,7 +950,15 @@
     if (li && li.value.trim()) { S.linkedin = li.value.trim(); S.form = S.form || {}; S.form.linkedin = S.linkedin; }
     const li2 = document.getElementById('linkedin');
     if (li2 && li2.value.trim()) { S.linkedin = li2.value.trim(); S.form = S.form || {}; S.form.linkedin = S.linkedin; }
-    if (Object.keys(S.form).length) {
+    const terms = document.getElementById('termsAccepted');
+    if (terms) { S.form = S.form || {}; S.form.termsAccepted = !!terms.checked; }
+    const alias = document.getElementById('inboxAlias');
+    if (alias) { S.form = S.form || {}; S.form.inboxAlias = alias.value.trim(); }
+    const fwd = document.getElementById('inboxForward');
+    if (fwd) { S.form = S.form || {}; S.form.inboxForward = !!fwd.checked; }
+    const ntf = document.getElementById('inboxNotify');
+    if (ntf) { S.form = S.form || {}; S.form.inboxNotify = !!ntf.checked; }
+    if (Object.keys(S.form || {}).length) {
       try { InstaWorkEngine.setProfile(S.form); } catch (e) {}
     }
   }
@@ -1077,7 +1209,18 @@
 
   window.handlePhoto = function (input) {
     const f = input.files?.[0];
-    if (f) { S.photo = f.name; try { InstaWorkEngine.setProfile({ photoName: f.name }); } catch (e) {} renderStep(); }
+    if (!f) return;
+    if (f.size > 8 * 1024 * 1024) { showError('La foto debe pesar menos de 8 MB.'); return; }
+    S.photo = f.name;
+    const reader = new FileReader();
+    reader.onload = () => { S.photoDataUrl = reader.result; try { InstaWorkEngine.setProfile({ photoName: f.name }); } catch (e) {} renderStep(); };
+    reader.readAsDataURL(f);
+  };
+
+  window.wizClearPhoto = function () {
+    S.photo = '';
+    S.photoDataUrl = '';
+    renderStep();
   };
 
   function genAnim() {
